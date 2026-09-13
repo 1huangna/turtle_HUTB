@@ -55,6 +55,16 @@ python -m pip install numpy==1.23.1
     您宿主机windows的IP地址通过`ipconfig`命令进行查看，一般和这里`172.21.108.47`的不一致，IP地址不正确只能看到黑屏。从 Town10HD_Opt 切换到 Town03 需要一定的时间，也会出现黑屏，这是正常现象
 
 
+### 其他
+
+在默认的 Town10HD_Opt 地图上启动手动控制（只修改参数 `town`），
+```shell
+roslaunch carla_ros_bridge carla_ros_bridge_with_example_ego_vehicle.launch host:=172.21.108.47 timeout:=60000 town:='Carla/Maps/Town10HD_Opt' spawn_point:=-25,-134,0.5,0,0,-90
+```
+
+![](./img/ground/launch_vehicle_Town10_Opt.png)
+
+
 ## 使用 rviz 进行可视化
 
 * 查看主题
@@ -101,6 +111,16 @@ rosinit( 'http://172.18.226.233:11311' )
 ```shell
 rostopic list
 ```
+
+## 解析
+
+该 [carla_ros_bridge_with_example_ego_vehicle.launch](https://github.com/OpenHUTB/ros2/blob/master/src/ground/ros-bridge/carla_ros_bridge/launch/carla_ros_bridge_with_example_ego_vehicle.launch) 文件包含 3 个启动步骤
+
+1. ROS 桥 [carla_ros_bridge.launch](https://github.com/OpenHUTB/ros2/tree/master/src/ground/ros-bridge/carla_ros_bridge/launch/carla_ros_bridge.launch) 用于连接模拟器
+
+2. 主车 [carla_example_ego_vehicle.launch](https://github.com/OpenHUTB/ros2/blob/master/src/ground/ros-bridge/carla_spawn_objects/launch/carla_example_ego_vehicle.launch)
+
+3. 手动控制 [carla_manual_control.launch](https://github.com/OpenHUTB/ros2/blob/master/src/ground/ros-bridge/carla_manual_control/launch/carla_manual_control.launch)
 
 
 ## 常见问题
