@@ -11,8 +11,8 @@
 
   <node
     pkg="turtle_hutb"
-    type="draw_hutb.py"
-    name="draw_hutb_node"
+    type="draw_openhutb.py"
+    name="draw_openhutb_node"
     output="screen"
     required="true"
   />

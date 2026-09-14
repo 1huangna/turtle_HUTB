@@ -4,7 +4,7 @@
   <version>0.0.1</version>
 
   <description>
-    ROS Noetic turtlesim demo for drawing HUTB automatically.
+    ROS Noetic turtlesim demo for drawing OpenHUTB automatically.
   </description>
 
   <maintainer email="2330268756@qq.com">huangna</maintainer>

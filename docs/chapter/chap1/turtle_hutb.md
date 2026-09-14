@@ -1,9 +1,9 @@
-# 小海龟自动绘制 HUTB
+# 小海龟自动绘制 OpenHUTB
 
 ## 一、实验目的
 
 本实验基于 Ubuntu 20.04、ROS Noetic 和 turtlesim，
-编写 Python ROS 节点，使小海龟自动绘制 HUTB 字样。
+编写 Python ROS 节点，使小海龟自动绘制 `OpenHUTB` 字样。
 
 实验主要使用 ROS 的话题通信、服务调用以及闭环控制机制。
 
@@ -24,9 +24,9 @@ turtle_hutb/
 ├── CMakeLists.txt
 ├── package.xml
 ├── launch/
-│   └── draw_hutb.launch
+│   └── draw_openhutb.launch
 └── scripts/
-    └── draw_hutb.py
+    └── draw_openhutb.py
 ```
 
 ## 四、实现原理
@@ -68,10 +68,10 @@ H、U、T、B 四个字符被分解为多组目标坐标，
 
 ## 五、编译
 
-将功能包复制到 catkin 工作空间：
+首先进入仓库中第一章源码目录：
 
 ```bash
-cp -r turtle_hutb ~/catkin_ws/src/
+cd src/chap1
 ```
 
 进入工作空间：
@@ -97,7 +97,7 @@ source devel/setup.bash
 可以直接运行：
 
 ```bash
-roslaunch turtle_hutb draw_hutb.launch
+roslaunch turtle_hutb draw_openhutb.launch
 ```
 
 也可以分别运行：
@@ -111,13 +111,16 @@ rosrun turtlesim turtlesim_node
 ```
 
 ```bash
-rosrun turtle_hutb draw_hutb.py
+rosrun turtle_hutb draw_openhutb.py
 ```
 
 ## 七、实验结果
 
-运行节点后，小海龟会自动在 turtlesim 窗口中绘制
-H、U、T、B 四个字符。
+运行节点后，小海龟会依次绘制 `O`、`p`、`e`、`n`、
+`H`、`U`、`T`、`B`，最终形成 `OpenHUTB` 字样。
+
+轨迹使用亮黄色，与 turtlesim 默认蓝色背景形成明显对比，
+便于观察最终绘制结果。
 
 程序利用 `/turtle1/pose` 的实时反馈进行闭环控制，
 相比仅使用固定运行时间的开环控制方式，可以获得更加稳定的轨迹。

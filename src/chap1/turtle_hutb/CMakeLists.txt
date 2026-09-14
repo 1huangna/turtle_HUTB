@@ -13,7 +13,7 @@ catkin_package()
 
 catkin_install_python(
   PROGRAMS
-    scripts/draw_hutb.py
+    scripts/draw_openhutb.py
   DESTINATION
     ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
