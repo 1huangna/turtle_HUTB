@@ -7,7 +7,7 @@ site_name: 模拟器的 ROS 文档
 
 
 # 设置编译页面的链接的前缀
-repo_url: https://github.com/OpenHUTB/template
+repo_url: https://github.com/OpenHUTB/ros2
 
 # 页面右上角添加直接编辑页面的按钮
 edit_uri: edit/master/docs/
