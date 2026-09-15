@@ -125,6 +125,8 @@ rosrun turtle_hutb draw_openhutb.py
 程序利用 `/turtle1/pose` 的实时反馈进行闭环控制，
 相比仅使用固定运行时间的开环控制方式，可以获得更加稳定的轨迹。
 
+![小海龟绘制正方形效果图](../../img/chapter/turtle_openhutb.png)
+
 ## 八、总结
 
 本实验通过 turtlesim 熟悉了 ROS 中发布者、订阅者和服务的基本使用方式，
