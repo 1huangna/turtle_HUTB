@@ -349,17 +349,19 @@ ros2 launch openhutb_yolo_mlp_control main.launch.py --show-args
 
 `openhutb_yolo_mlp_control` 提供独立的 YOLO 目标水平居中模式。节点根据检测框的水平偏差控制无人机横向运动，使目标接近画面中心；不控制前进距离、避障、垂直居中或相机朝向。无人机须先在仿真器中起飞并稳定，本模式不负责解锁、起飞或降落。
 
-目标类别默认为 `car`，也可通过 `target_class:=person` 等参数切换。以下命令在完成本文前述依赖安装、功能包构建并加载工作空间后运行。先将 `REPO_DIR` 设为本仓库根目录，再设置当前 Windows 主机地址并确认 RPC 端口可达：
+目标类别默认为 `car`，也可通过 `target_class:=person` 等参数切换。运行前需先准备 YOLO11n 权重；该文件不包含在仓库中，可从[模型下载地址](https://pan.baidu.com/s/1nHSTqk4aYdC5HOpih6jPrg?pwd=fffa)下载（提取码：`fffa`）。请将 `yolo11n.pt` 保存到本地，并在启动时传入其绝对路径，避免 Ultralytics 在运行时尝试联网下载。
+
+以下命令在完成本文前述依赖安装、功能包构建并加载工作空间后运行。先将 `REPO_DIR` 设为本仓库根目录，再设置模型文件和当前 Windows 主机地址，并确认文件及 RPC 端口可用：
 
 ```bash
 export REPO_DIR=/绝对路径/到/ros2
+export YOLO_MODEL=/绝对路径/到/yolo11n.pt
 export AIRSIM_IP=实际Windows地址
-nc -vz "$AIRSIM_IP" 41451
-export YOLO_MODEL="$REPO_DIR/src/air/openhutb_yolo_mlp_control/openhutb_yolo_mlp_control/yolo11n.pt"
 test -f "$YOLO_MODEL"
+nc -vz "$AIRSIM_IP" 41451
 ```
 
-如果模型位于其他位置，将 `YOLO_MODEL` 设为模型文件的实际路径。`REPO_DIR` 应设置为本仓库根目录，不依赖特定的工作空间名称。
+`REPO_DIR` 应设置为本仓库根目录，不依赖特定的工作空间名称；`YOLO_MODEL` 则应指向刚才下载的权重文件。
 
 ### 预览控制量
 
