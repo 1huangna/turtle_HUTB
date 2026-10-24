@@ -154,7 +154,6 @@ ROS 2 话题发布订阅基础实验（talker/listener）：[chap2/ros2_pubsub_p
 
 * [状态识别与轨迹绘制](./air/drone_trajectory_logger.md)
 
-* [YOLO目标水平视觉居中](./air/yolo_visual_centering.md)
 
 
 ## 6. 水域载具  <span id='water_vehicle'></span>
