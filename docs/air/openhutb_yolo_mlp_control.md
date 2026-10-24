@@ -626,3 +626,141 @@ OpenHUTB 地图对应的 OpenDRIVE 文件包含道路几何和车道信息，可
 ## 说明
 
 本文档整理、代码重构和问题排查过程中使用了大模型辅助；提交者已检查全部内容并对最终结果负责。
+
+<span id="traffic-tracking"></span>
+
+## Traffic Manager 车辆轨迹与仿真位姿跟随
+
+本示例复用当前地图，生成由 CARLA Traffic Manager 控制的汽车，记录车辆真实状态并生成轨迹快照。可选的无人机跟随使用车辆位置生成期望跟随点，默认位于车辆后方 12 米、上方 25 米。
+
+**目标位置来自 CARLA 车辆坐标，尚未接入 YOLO 视觉闭环，也不能据此认定无人机动力学跟随已经验证通过。** 跟随入口显式使用增量 `simSetVehiclePose` 控制，用于仿真位置演示。程序保留当前朝向，不自动旋转机身或调整相机；车辆转弯后可能离开前向画面。鼠标视角稳定性仍需在目标模拟器中复验。
+
+### 环境与入口
+
+源码位于本功能包 `tools/traffic`，安装时也会复制到 `share/openhutb_yolo_mlp_control/tools/traffic`。这些辅助入口直接使用模拟器 API，不要求运行 ROS 节点或发布 `/openhutb/cmd_vel`。
+
+- Windows：运行 OpenHUTB AIR 场景和匹配版本的 CARLA Python API；车辆生成与记录使用该环境。
+- WSL2 Ubuntu 22.04 / Python 3.10：运行随包提供的 AirSim 客户端和可选的位姿跟随。
+- 绘图依赖：`numpy`、`matplotlib`。AirSim 客户端依赖 `numpy`、`msgpack`。
+
+HUTB 2.10.0 随附 Windows wheel；不能在 WSL 中安装 `win_amd64.whl`，也不要用任意版本的 `carla` 替代。脚本会检查客户端与服务端版本。
+
+下面的 PowerShell 命令从**仓库根目录**执行。首次获取源码可运行 `git clone https://github.com/OpenHUTB/ros2.git`，然后 `cd ros2`；测试未合并 PR 时应先检出对应 PR 分支。
+
+```powershell
+$repoDir = (git rev-parse --show-toplevel).Trim()
+$toolsDir = Join-Path $repoDir 'src/air/openhutb_yolo_mlp_control/tools/traffic'
+$env:HUTB_ROOT = Read-Host '输入本机 OpenHUTB 模拟器目录的完整路径'
+$apiEnv = Join-Path $env:LOCALAPPDATA 'OpenHUTB/traffic_api'
+python -m venv $apiEnv
+$carlaPython = Join-Path $apiEnv 'Scripts/python.exe'
+$pythonTag = (& $carlaPython -c "import sys; print('cp%d%d' % sys.version_info[:2])").Trim()
+$wheels = @(Get-ChildItem (Join-Path $env:HUTB_ROOT 'PythonAPI/carla/dist') -Filter "hutb-*-$pythonTag-*-win_amd64.whl")
+if ($wheels.Count -ne 1) { throw '请使用模拟器 wheel 所支持的 Python 版本，并核对 wheel 目录' }
+# 车辆入口只导入 CARLA；不安装 wheel 中未被该入口使用的 AirSim 依赖。
+& $carlaPython -m pip install --no-deps $wheels[0].FullName
+$runDir = Join-Path $env:LOCALAPPDATA ('OpenHUTB/traffic_runs/' + (Get-Date -Format 'yyyyMMdd_HHmmss'))
+```
+
+启动模拟器并加载地图，仅保留一个运行实例。默认 CARLA 地址为 `127.0.0.1:2000`，通过 `--host`、`--port` 可修改。工具不调用 `load_world()`，也不抢占 `world.tick()`。
+
+### 生成车辆与记录轨迹
+
+第一个 PowerShell 终端生成 8 辆车并保持运行，按 `Ctrl+C` 清理**本进程创建的车辆**：
+
+```powershell
+& $carlaPython "$toolsDir/main.py" spawn --count 8
+```
+
+已由本工具生成车辆时不要重复生成。打开第二个 PowerShell 终端，在仓库根目录重新定义前三个变量，并创建新的输出目录：
+
+```powershell
+$repoDir = (git rev-parse --show-toplevel).Trim()
+$toolsDir = Join-Path $repoDir 'src/air/openhutb_yolo_mlp_control/tools/traffic'
+$carlaPython = Join-Path $env:LOCALAPPDATA 'OpenHUTB/traffic_api/Scripts/python.exe'
+$runDir = Join-Path $env:LOCALAPPDATA ('OpenHUTB/traffic_runs/' + (Get-Date -Format 'yyyyMMdd_HHmmss'))
+& $carlaPython "$toolsDir/main.py" record --output $runDir --duration 90
+```
+
+记录入口只读取 `role_name=openhutb_traffic_demo` 的车辆。若汽车由其他工具生成，应先确认其角色属性。每次使用新目录，避免不同世界、不同采集会话混入同一 CSV。`--duration 0` 表示持续记录到 `Ctrl+C`。也可通过 `launch.ps1 -PythonExe $carlaPython -Mode record -Output $runDir -Duration 90` 调用相同入口。
+
+输出包括：
+
+| 文件 | 内容 |
+| --- | --- |
+| `vehicle_trajectories.csv` | 时间戳、模拟帧号、车辆 ID、车型、位置、朝向和速度 |
+| `metadata.json` | 当前地图、实际采集时长和记录数量 |
+| `references.json` | 当前地图中用于校准的静态场景参考点 |
+| `live.json` | 最新车辆状态，供可选的跟随入口读取 |
+
+车辆 CSV 使用 CARLA 左手世界坐标，位置单位为米，朝向单位为度，速度单位为米每秒。记录约按墙钟 10 Hz 采样并跳过重复模拟帧，不能直接当作 ROS `map` 坐标使用。
+
+### 生成轨迹快照
+
+采集完成后，可在同一个 Windows Python 环境安装绘图依赖并导出 PNG、PDF 和每辆车的统计 CSV：
+
+```powershell
+& $carlaPython -m pip install numpy matplotlib
+& $carlaPython "$toolsDir/plot_trajectories.py" --data $runDir
+```
+
+![Traffic Manager 车辆轨迹与速度](../img/air/openhutb_yolo_mlp_control/traffic_trajectory_snapshot.png)
+
+图中圆点与叉号分别表示记录起点和终点；速度曲线横轴为模拟时间，纵轴为水平速度。行驶距离按相邻二维位置采样点累加。该图反映车辆状态记录效果，不表示视觉检测或无人机跟随效果。
+
+### 可选：WSL 仿真位姿跟随
+
+此步骤会移动仿真无人机，应先停止其他无人机控制器。记录入口需用 `--duration 0` 持续运行；位姿跟随默认运行 90 秒，到时尝试取消运动任务并释放 API 控制。不要在车辆停止移动时误以为跟随程序已结束。
+
+在第二个 PowerShell 终端（保留 `$repoDir` 和 `$runDir`）打开定位到同一源码目录的 WSL 终端，并打印本次数据目录的 WSL 路径：
+
+```powershell
+wsl.exe -d Ubuntu-22.04 -e wslpath -u $runDir
+wsl.exe -d Ubuntu-22.04 --cd $repoDir
+```
+
+随后在 WSL 中执行：
+
+```bash
+python3 -m venv "$HOME/.venvs/openhutb_traffic"
+source "$HOME/.venvs/openhutb_traffic/bin/activate"
+python -m pip install numpy msgpack
+export REPO_DIR="$(git rev-parse --show-toplevel)"
+export TOOLS_DIR="$REPO_DIR/src/air/openhutb_yolo_mlp_control/tools/traffic"
+read -r -p '输入上面 wslpath 输出的本次数据目录: ' TRAFFIC_DATA
+export TRAFFIC_DATA
+read -r -p '输入当前已验证可达的 Windows 主机 IP: ' AIRSIM_IP
+export AIRSIM_IP
+python - <<'PY'
+import os, socket
+with socket.create_connection((os.environ['AIRSIM_IP'], 41451), timeout=3):
+    print('AirSim TCP reachable')
+PY
+python "$TOOLS_DIR/follow_vehicle.py" --data "$TRAFFIC_DATA" \
+  --host "$AIRSIM_IP" --enable-pose-control --duration 90
+```
+
+脚本用至少 5 个、最多 20 个共同静态对象校准 CARLA 与 AirSim 坐标，超出 0.25 米残差或参考点不足时拒绝跟随。它仅支持坐标轴对齐、Z 方向相反的平移转换；不满足该假设的地图需要独立坐标配准。校准后选择附近正在移动的车辆，也可通过 `--target-id` 指定本次记录中的 ID。模拟器重启后重新生成参考数据，不能复用旧 ID。
+
+出现近期碰撞、目标消失、地图改变或车辆数据超过 2 秒未更新时结束跟随并尝试释放控制。`drone_follow.csv` 记录无人机与期望点的 NED 坐标、水平误差和阶段；误差指无人机到后方跟随点的距离，不是到车身的距离。`follow_status.json` 中 `running=false` 和 `control_released=true` 分别表示循环结束及释放调用成功。
+
+暂停与结束是不同操作。在另一个 WSL 终端设置相同的 `TRAFFIC_DATA` 后执行：
+
+```bash
+# 暂停并保持位置，程序仍持续写入位置；保留当前朝向。
+touch "$TRAFFIC_DATA/follow_pause"
+# 恢复跟随。
+rm -f "$TRAFFIC_DATA/follow_pause"
+# 结束跟随，退出位置更新并尝试释放 API 控制。
+touch "$TRAFFIC_DATA/follow_exit"
+```
+
+也可在跟随终端按 `Ctrl+C`。先结束跟随，再关闭记录和车辆生成终端。释放控制不等于自动降落或悬停；鼠标视角在释放后仍旋转时，需要继续排查模拟器输入状态。程序不会在退出时额外发送异步悬停任务。
+
+同一输出目录只允许启动一次跟随，以防多个控制器同时写入。需要重复运行时结束旧跟随并启动新的记录会话。模拟器重启后所有入口均重新运行。
+
+### 本次记录验证
+
+整理后的记录入口在 Windows 11、Python 3.13.14、HUTB 2.10.0 / Town10HD 上完成约 90.08 秒采集，共 8 辆车、7064 条状态记录，每辆车 883 条。[采集元数据](../img/air/openhutb_yolo_mlp_control/traffic_capture_metadata.json)与[各车统计](../img/air/openhutb_yolo_mlp_control/traffic_vehicle_summary.csv)随图提供。绘图与 6 项离线测试在 WSL2 Ubuntu 22.04 / Python 3.10 中完成。离线测试覆盖坐标校准、无效参考点、跟随点、步长限制、过期数据，以及保留朝向和退出释放调用顺序；不替代在线飞行验证。
+
+本次未重新启动无人机，最终跟随入口的鼠标视角与完整退出效果仍待模拟器复验。历史位姿演示指标不能作为最终入口的动力学验收结果。
