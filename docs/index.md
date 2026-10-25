@@ -149,7 +149,7 @@ ROS 2 话题发布订阅基础实验（talker/listener）：[chap2/ros2_pubsub_p
 
 * [AP-CPP 主动感知覆盖路径规划](./ap_cpp_overfomo.md) —— 基于 AirSim 的无人机主动感知覆盖路径规划，在 OverFOMO 自适应覆盖规划的基础上进一步决定「该去哪里看」
 
-* [YOLO 感知与无人机控制](./air/openhutb_yolo_mlp_control/README.md) —— YOLO 目标检测、MLP 八字轨迹控制、目标水平视觉居中及 Traffic Manager 车辆轨迹记录与仿真位姿跟随
+* [YOLO 感知与无人机控制](./air/openhutb_yolo_mlp_control/README.md)
 * [AllocNet 四旋翼避障规划与键盘遥操作](./air/allocnet_teleop.md) —— 在学习型时间分配的避障轨迹规划基础上，补齐键盘航点下发、地图常驻转发与轨迹记录的人机交互层
 
 * [状态识别与轨迹绘制](./air/drone_trajectory_logger.md)
