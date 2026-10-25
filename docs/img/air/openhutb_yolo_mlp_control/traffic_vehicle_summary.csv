@@ -1,9 +1,0 @@
-actor_id,vehicle_type,samples,distance_m,mean_speed_kmh,max_speed_kmh,simulation_duration_s
-25,vehicle.toyota.prius,883,271.97,10.89,29.67,89.98
-26,vehicle.nissan.patrol,883,568.75,22.75,31.8,89.98
-27,vehicle.chevrolet.impala,883,550.04,22.0,30.18,89.98
-28,vehicle.wuling-1.wuling-1,883,453.68,18.15,31.96,89.98
-29,vehicle.audi.a2,883,405.11,16.23,29.94,89.98
-30,vehicle.hongqi-1.hongqi-1,883,487.81,19.52,29.69,89.98
-31,vehicle.audi.a2,883,324.82,13.01,30.04,89.98
-32,vehicle.tesla.model3,883,559.59,22.4,30.59,89.98

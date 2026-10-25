@@ -127,7 +127,7 @@ touch "$TRAFFIC_DATA/follow_exit"
 
 ## 验证结果
 
-Windows 11、Python 3.13.14、HUTB 2.10.0 / Town10HD 下采集约 90.08 秒，共 8 辆车、7064 条记录。[采集元数据](../../img/air/openhutb_yolo_mlp_control/traffic_capture_metadata.json)与[各车统计](../../img/air/openhutb_yolo_mlp_control/traffic_vehicle_summary.csv)随图提供。WSL2 Ubuntu 22.04 / Python 3.10 下完成绘图，6 项离线测试通过。
+Windows 11、Python 3.13.14、HUTB 2.10.0 / Town10HD 下采集约 90.08 秒，共 8 辆车、7064 条记录。WSL2 Ubuntu 22.04 / Python 3.10 下完成绘图，6 项离线测试通过。
 
 无人机跟随入口的鼠标视角与退出效果仍待在线复验。
 
