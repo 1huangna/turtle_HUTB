@@ -125,6 +125,10 @@ touch "$TRAFFIC_DATA/follow_exit"
 
 也可按 `Ctrl+C` 结束跟随；释放控制不执行降落或悬停。
 
+![OpenHUTB 车辆与无人机运行场景](../../img/air/openhutb_yolo_mlp_control/traffic_simulation_scene.png)
+
+图中展示场景车辆与无人机，静态截图不作为动力学跟随验证依据。
+
 ## 验证结果
 
 Windows 11、Python 3.13.14、HUTB 2.10.0 / Town10HD 下采集约 90.08 秒，共 8 辆车、7064 条记录。WSL2 Ubuntu 22.04 / Python 3.10 下完成绘图，6 项离线测试通过。
