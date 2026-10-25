@@ -195,4 +195,4 @@ model_path:="$HOME/models/yolo11n.pt"
 
 目标位置来自 CARLA 车辆坐标，尚未接入 YOLO 视觉闭环，也不能据此认定无人机动力学跟随已经验证通过。跟随使用增量位姿更新。
 
-完整的环境安装、车辆生成、记录、绘图、WSL 跟随及释放控制命令见[车辆轨迹与仿真跟随教程](../../../docs/air/openhutb_yolo_mlp_control.md#traffic-tracking)。
+完整的环境安装、车辆生成、记录、绘图、WSL 跟随及释放控制命令见[车辆轨迹与仿真跟随教程](../../../docs/air/openhutb_yolo_mlp_control/traffic_tracking.md)。
