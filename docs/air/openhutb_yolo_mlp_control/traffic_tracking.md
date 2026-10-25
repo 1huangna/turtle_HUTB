@@ -92,7 +92,7 @@ wsl.exe -d Ubuntu-22.04 --cd $repoDir
 ```bash
 python3 -m venv "$HOME/.venvs/openhutb_traffic"
 source "$HOME/.venvs/openhutb_traffic/bin/activate"
-python -m pip install numpy msgpack
+python -m pip install -r src/air/openhutb_yolo_mlp_control/tools/traffic/requirements.txt
 export REPO_DIR="$(git rev-parse --show-toplevel)"
 export TOOLS_DIR="$REPO_DIR/src/air/openhutb_yolo_mlp_control/tools/traffic"
 read -r -p '输入上面 wslpath 输出的本次数据目录: ' TRAFFIC_DATA

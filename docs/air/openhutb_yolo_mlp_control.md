@@ -5,6 +5,10 @@
 - [环境配置](openhutb_yolo_mlp_control/setup.md)
 - [YOLO 感知与八字轨迹控制](openhutb_yolo_mlp_control/yolo_trajectory_control.md)
 
+## YOLO 目标水平视觉居中
+
+参阅[YOLO 目标水平视觉居中](openhutb_yolo_mlp_control/yolo_visual_centering.md)。
+
 <span id="traffic-tracking"></span>
 
 ## Traffic Manager 车辆轨迹与仿真位姿跟随

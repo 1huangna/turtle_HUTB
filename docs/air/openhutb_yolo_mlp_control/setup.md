@@ -73,6 +73,35 @@ sudo apt install -y netcat-openbsd
 
 > WSL2 网络模式可能因系统配置不同而有所差异。如果已经使用支持 localhost 转发的网络模式，也可以测试 `127.0.0.1:41451`；最终以 `nc` 的实际连通结果为准。
 
+## 相机分辨率
+
+本示例的 YOLO 窗口按 **1280×720** 的相机图像配置。使用默认的 **256×144** 图像时，固定像素大小的性能信息面板会遮挡大部分画面，文字也可能显示不全。调整 OpenCV 窗口大小或 YOLO 推理尺寸不会提高相机采集分辨率。
+
+在运行模拟器的 Windows 主机上，编辑“文档”目录中的 `AirSim/settings.json`（通常为 `%USERPROFILE%\Documents\AirSim\settings.json`）。将以下字段合并到现有配置的顶层，保留其他配置：
+
+```json
+{
+  "CameraDefaults": {
+    "CaptureSettings": [
+      {
+        "ImageType": 0,
+        "Width": 1280,
+        "Height": 720
+      }
+    ]
+  }
+}
+```
+
+`ImageType: 0` 对应 RGB 场景图像。若现有 `Vehicles.<车辆名>.Cameras.<相机名>.CaptureSettings` 已单独配置分辨率，应直接修改该相机中 `ImageType: 0` 项的 `Width` 和 `Height`；相机级配置会覆盖 `CameraDefaults`。本示例默认使用相机 `0`。
+
+保存后重启 OpenHUTB，进入 AIR 模式并重新启动 ROS 感知节点。在已加载 ROS 环境的 WSL 终端确认实际图像尺寸，预期依次输出 `1280` 和 `720`：
+
+```bash
+ros2 topic echo /openhutb/camera/rgb --once --field width
+ros2 topic echo /openhutb/camera/rgb --once --field height
+```
+
 ## YOLO11n 模型
 
 YOLO11n 权重需要单独准备，并通过 launch 参数传入本地模型路径。

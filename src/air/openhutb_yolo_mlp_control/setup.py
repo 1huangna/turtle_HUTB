@@ -18,7 +18,7 @@ setup(
         ),
         (
             'share/' + package_name,
-            ['package.xml']
+            ['package.xml', 'main.sh']
         ),
         (
             'share/' + package_name + '/launch',
@@ -59,6 +59,9 @@ setup(
 
     entry_points={
         'console_scripts': [
+
+            'visual_centering = '
+            'openhutb_yolo_mlp_control.visual_centering_node:main',
 
             'airsim_bridge = '
             'openhutb_yolo_mlp_control.'
