@@ -20,14 +20,14 @@ Windows 使用 HUTB 2.10.0 随附、与本机 Python 版本匹配的 wheel。
 $repoDir = (git rev-parse --show-toplevel).Trim()
 $toolsDir = Join-Path $repoDir 'src/air/openhutb_yolo_mlp_control/tools/traffic'
 $env:HUTB_ROOT = Read-Host '输入本机 OpenHUTB 模拟器目录的完整路径'
-$apiEnv = Join-Path $env:LOCALAPPDATA 'OpenHUTB/traffic_api'
+$apiEnv = Join-Path $env:USERPROFILE '.venvs/openhutb_traffic_api'
 python -m venv $apiEnv
 $carlaPython = Join-Path $apiEnv 'Scripts/python.exe'
 $pythonTag = (& $carlaPython -c "import sys; print('cp%d%d' % sys.version_info[:2])").Trim()
 $wheels = @(Get-ChildItem (Join-Path $env:HUTB_ROOT 'PythonAPI/carla/dist') -Filter "hutb-*-$pythonTag-*-win_amd64.whl")
 if ($wheels.Count -ne 1) { throw '请使用模拟器 wheel 所支持的 Python 版本，并核对 wheel 目录' }
 & $carlaPython -m pip install --no-deps $wheels[0].FullName
-$runDir = Join-Path $env:LOCALAPPDATA ('OpenHUTB/traffic_runs/' + (Get-Date -Format 'yyyyMMdd_HHmmss'))
+$runDir = Join-Path $env:USERPROFILE ('OpenHUTB/traffic_runs/' + (Get-Date -Format 'yyyyMMdd_HHmmss'))
 ```
 
 启动模拟器并加载地图。CARLA 默认地址为 `127.0.0.1:2000`，可通过 `--host`、`--port` 修改。
@@ -45,8 +45,8 @@ $runDir = Join-Path $env:LOCALAPPDATA ('OpenHUTB/traffic_runs/' + (Get-Date -For
 ```powershell
 $repoDir = (git rev-parse --show-toplevel).Trim()
 $toolsDir = Join-Path $repoDir 'src/air/openhutb_yolo_mlp_control/tools/traffic'
-$carlaPython = Join-Path $env:LOCALAPPDATA 'OpenHUTB/traffic_api/Scripts/python.exe'
-$runDir = Join-Path $env:LOCALAPPDATA ('OpenHUTB/traffic_runs/' + (Get-Date -Format 'yyyyMMdd_HHmmss'))
+$carlaPython = Join-Path $env:USERPROFILE '.venvs/openhutb_traffic_api/Scripts/python.exe'
+$runDir = Join-Path $env:USERPROFILE ('OpenHUTB/traffic_runs/' + (Get-Date -Format 'yyyyMMdd_HHmmss'))
 & $carlaPython "$toolsDir/main.py" record --output $runDir --duration 90
 ```
 
@@ -131,9 +131,9 @@ touch "$TRAFFIC_DATA/follow_exit"
 
 ## 验证结果
 
-Windows 11、Python 3.13.14、HUTB 2.10.0 / Town10HD 下采集约 90.08 秒，共 8 辆车、7064 条记录。WSL2 Ubuntu 22.04 / Python 3.10 下完成绘图，6 项离线测试通过。
+Windows 11、Python 3.13.14、HUTB 2.10.0 / Town10HD 下完成车辆生成、记录与快照导出，采集约 215.14 秒，共 8 辆车、16688 条记录。WSL2 Ubuntu 22.04 / Python 3.10 下完成 90 秒仿真位姿跟随、暂停恢复、手动结束和 API 控制释放验证；新增 6 项测试及原有测试共 31 项通过。
 
-无人机跟随入口的鼠标视角与退出效果仍待在线复验。
+鼠标视角交互与退出后的控制状态已由操作者确认。
 
 返回[文档目录](README.md)。
 
