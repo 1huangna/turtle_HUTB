@@ -8,7 +8,8 @@ import sys
 import time
 from pathlib import Path
 
-from common import calibration_offset, following_point, read_live, step_towards, write_json
+from common import (REFERENCE_LIMIT, calibration_offset, follow_phase, following_point,
+                    positive, read_live, follow_step, write_json)
 
 
 def follow(args):
@@ -41,7 +42,7 @@ def follow(args):
             values = [p.x_val, p.y_val, p.z_val]
             if all(math.isfinite(value) for value in values):
                 pairs.append((reference['carla'], values))
-            if len(pairs) >= 20:
+            if len(pairs) >= REFERENCE_LIMIT:
                 break
         offset, residual = calibration_offset(pairs)
         write_json(directory / 'calibration.json',
@@ -67,13 +68,17 @@ def follow(args):
         writer = csv.writer(stream)
         writer.writerow(['wall_time', 'target_id', 'drone_x_ned', 'drone_y_ned',
                          'drone_z_ned', 'desired_x_ned', 'desired_y_ned', 'desired_z_ned',
-                         'horizontal_error_m', 'phase', 'collision'])
+                         'horizontal_error_m', 'observed_speed_mps',
+                         'observed_horizontal_speed_mps', 'phase', 'collision'])
         start = previous = time.monotonic()
+        previous_pose = None
+        previous_pose_time = None
         held_position = None
         reason = 'duration'
         print(f'Target {target_id}; backend=incremental_pose; calibration residual={residual:.6f} m',
               flush=True)
         try:
+            control.enableApiControl(True)
             control.cancelLastTask()
             while args.duration == 0 or time.monotonic() - start < args.duration:
                 if exit_file.exists():
@@ -92,12 +97,18 @@ def follow(args):
                 pose = client.simGetVehiclePose()
                 p = pose.position
                 current = [p.x_val, p.y_val, p.z_val]
+                pose_time = time.monotonic()
+                observed_speed = (math.dist(current, previous_pose)
+                                  / max(pose_time - previous_pose_time, 1e-9)
+                                  if previous_pose is not None else 0.0)
+                observed_horizontal_speed = (
+                    math.dist(current[:2], previous_pose[:2])
+                    / max(pose_time - previous_pose_time, 1e-9)
+                    if previous_pose is not None else 0.0)
+                previous_pose = current
+                previous_pose_time = pose_time
                 desired = following_point(vehicle, offset, args.distance, args.height)
-                phase = 'follow'
-                # Do not begin horizontal pursuit before reaching altitude.
-                if abs(current[2] - desired[2]) > 2:
-                    desired[:2] = current[:2]
-                    phase = 'climb'
+                phase = follow_phase(current, desired)
                 if pause_file.exists():
                     if held_position is None:
                         held_position = current[:]
@@ -108,18 +119,25 @@ def follow(args):
                 now = time.monotonic()
                 dt = min(max(now - previous, 0), 0.25)
                 previous = now
-                position = step_towards(current, desired, args.speed * dt)
-                # Preserve current orientation; never lock yaw against mouse input.
+                position = follow_step(current, desired, args.speed * dt)
+                # Keep simulator collision checks enabled to avoid moving through scenery.
                 control.simSetVehiclePose(
-                    airsim.Pose(airsim.Vector3r(*position), pose.orientation), False)
+                    airsim.Pose(airsim.Vector3r(*position), pose.orientation),
+                    args.ignore_collision)
                 error = math.hypot(current[0] - desired[0], current[1] - desired[1])
                 writer.writerow([time.time(), target_id, *current, *desired,
-                                 error, phase, state.collision.has_collided])
+                                 error, observed_speed, observed_horizontal_speed,
+                                 phase, state.collision.has_collided])
                 stream.flush()
                 write_json(directory / 'follow_status.json',
                            {'running': True, 'target_id': target_id, 'phase': phase,
                             'backend': 'incremental_pose', 'heading_mode': 'preserve_current',
-                            'horizontal_error_m': error, 'time': time.time()})
+                            'horizontal_error_m': error,
+                            'pose_displacement_limit_mps': args.speed,
+                            'observed_speed_mps': observed_speed,
+                            'observed_horizontal_speed_mps': observed_horizontal_speed,
+                            'ignore_collision': args.ignore_collision,
+                            'time': time.time()})
                 time.sleep(0.2)
         except KeyboardInterrupt:
             reason = 'keyboard_interrupt'
@@ -141,7 +159,6 @@ def follow(args):
 
 
 def main():
-    from main import positive
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--data', type=Path, required=True)
     parser.add_argument('--host', required=True, help='Verified AirSim host address')
@@ -149,13 +166,19 @@ def main():
     parser.add_argument('--target-id', type=int)
     parser.add_argument('--height', type=positive, default=25)
     parser.add_argument('--distance', type=positive, default=12)
-    parser.add_argument('--speed', type=positive, default=12)
+    parser.add_argument('--speed', type=positive, default=12,
+                        help='Maximum pose displacement rate in m/s; not a dynamics speed')
+    parser.add_argument('--ignore-collision', action='store_true',
+                        help='Allow pose updates to pass through scene collisions')
     parser.add_argument('--duration', type=float, default=90, help='Seconds; 0 until manual exit')
     parser.add_argument('--enable-pose-control', action='store_true',
                         help='Explicitly enable simulated pose following')
     args = parser.parse_args()
     if not args.enable_pose_control:
         parser.error('Following requires --enable-pose-control; this is not native flight control')
+    if args.ignore_collision:
+        print('WARNING: --ignore-collision may move the simulated vehicle through scenery.',
+              file=sys.stderr, flush=True)
     if not math.isfinite(args.duration) or args.duration < 0:
         parser.error('--duration must be finite and nonnegative')
     follow(args)

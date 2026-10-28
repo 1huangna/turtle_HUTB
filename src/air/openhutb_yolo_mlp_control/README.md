@@ -197,7 +197,7 @@ model_path:="$HOME/models/yolo11n.pt"
 
 ## Traffic Manager 车辆轨迹与仿真位姿跟随
 
-辅助入口位于 `tools/traffic`：`main.py spawn` 生成汽车，`main.py record` 记录现有车辆，`plot_trajectories.py` 导出快照，`follow_vehicle.py` 显式启用仿真位姿跟随，`launch.ps1` 提供 Windows 前台启动入口。
+辅助入口位于 `tools/traffic`：`main.py spawn` 生成汽车，`main.py record` 记录现有车辆，`main.py clean` 清理异常退出后残留的受管车辆，`plot_trajectories.py` 导出快照，`follow_vehicle.py` 显式启用仿真位姿跟随，`launch.ps1` 提供 Windows 前台启动入口。
 
 目标位置来自 CARLA 车辆坐标，尚未接入 YOLO 视觉闭环，也不能据此认定无人机动力学跟随已经验证通过。跟随使用增量位姿更新。
 

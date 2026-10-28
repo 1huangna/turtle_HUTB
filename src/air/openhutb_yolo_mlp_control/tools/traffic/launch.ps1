@@ -1,6 +1,6 @@
 param(
     [Parameter(Mandatory=$true)][string]$PythonExe,
-    [ValidateSet('spawn','record')][string]$Mode='record',
+    [ValidateSet('spawn','record','clean')][string]$Mode='record',
     [string]$CarlaHost='127.0.0.1',
     [int]$Port=2000,
     [int]$Count=8,
@@ -12,6 +12,8 @@ $ErrorActionPreference='Stop'
 $entry=Join-Path $PSScriptRoot 'main.py'
 if($Mode -eq 'spawn') {
     & $PythonExe $entry --host $CarlaHost --port $Port spawn --count $Count
+} elseif($Mode -eq 'clean') {
+    & $PythonExe $entry --host $CarlaHost --port $Port clean
 } else {
     & $PythonExe $entry --host $CarlaHost --port $Port record --output $Output --duration $Duration
 }

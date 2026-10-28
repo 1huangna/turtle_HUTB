@@ -61,7 +61,7 @@ $runDir = Join-Path $env:USERPROFILE ('OpenHUTB/traffic_runs/' + (Get-Date -Form
 | `references.json` | 当前地图中用于校准的静态场景参考点 |
 | `live.json` | 最新车辆状态，供可选的跟随入口读取 |
 
-车辆 CSV 使用 CARLA 左手世界坐标，位置、朝向、速度单位分别为米、度、米每秒；按墙钟约 10 Hz 采样并跳过重复模拟帧。
+车辆 CSV 使用 CARLA 左手世界坐标，位置、朝向、速度单位分别为米、度、米每秒；按请求频率采样并跳过重复模拟帧。`metadata.json` 同时记录请求频率 `sampling_hz_requested` 和实测墙钟频率 `sampling_hz_actual`。
 
 ## 可选：生成轨迹快照
 
@@ -94,6 +94,7 @@ python3 -m venv "$HOME/.venvs/openhutb_traffic"
 source "$HOME/.venvs/openhutb_traffic/bin/activate"
 python -m pip install -r src/air/openhutb_yolo_mlp_control/tools/traffic/requirements.txt
 export REPO_DIR="$(git rev-parse --show-toplevel)"
+python -m pip install -e "$REPO_DIR/src/air/openhutb_yolo_mlp_control"
 export TOOLS_DIR="$REPO_DIR/src/air/openhutb_yolo_mlp_control/tools/traffic"
 read -r -p '输入上面 wslpath 输出的本次数据目录: ' TRAFFIC_DATA
 export TRAFFIC_DATA
@@ -108,9 +109,9 @@ python "$TOOLS_DIR/follow_vehicle.py" --data "$TRAFFIC_DATA" \
   --host "$AIRSIM_IP" --enable-pose-control --duration 90
 ```
 
-脚本通过 5～20 个共同静态对象校准 CARLA 与 AirSim 坐标，允许残差为 0.25 米，适用于坐标轴对齐、Z 方向相反的场景。默认选择附近移动车辆，可用 `--target-id` 指定。
+脚本最多导出 20 个候选静态对象，至少匹配 5 个后校准 CARLA 与 AirSim 坐标，允许残差为 0.25 米，适用于坐标轴对齐、Z 方向相反的场景。默认选择附近移动车辆，可用 `--target-id` 指定。
 
-`drone_follow.csv` 记录无人机与期望点的 NED 坐标、水平误差和阶段；`follow_status.json` 保存运行与控制释放状态。碰撞、目标消失、地图改变或车辆数据超时会结束跟随。
+`drone_follow.csv` 记录无人机与期望点的 NED 坐标、水平误差、实际三维／水平速度和阶段；`follow_status.json` 保存运行与控制释放状态。碰撞、目标消失、地图改变或车辆数据超时会结束跟随。`--speed`（默认 12）是每秒位姿更新的最大位移，不是 AirSim 动力学速度；爬升阶段为垂直运动保留位移预算，同时水平逼近，三维总步长仍受上限约束。启动时取得 API 控制，结束时释放。请从空旷位置运行。默认保留碰撞检查，场景几何可能阻挡位姿更新；本工具不提供避障规划，也不保证实际达到该上限或追上车辆。`--ignore-collision` 可显式关闭碰撞检查，但可能使位姿穿过场景物体。
 
 另一个 WSL 终端设置相同的 `TRAFFIC_DATA` 后，可暂停、恢复或结束跟随：
 
@@ -123,7 +124,7 @@ rm -f "$TRAFFIC_DATA/follow_pause"
 touch "$TRAFFIC_DATA/follow_exit"
 ```
 
-也可按 `Ctrl+C` 结束跟随；释放控制不执行降落或悬停。
+也可按 `Ctrl+C` 结束跟随；释放控制不执行降落或悬停。若 `spawn` 被强制终止而有车辆残留，可在 Windows 运行 `& $carlaPython "$toolsDir/main.py" clean` 清理 `role_name=openhutb_traffic_demo` 的车辆。
 
 ![OpenHUTB 车辆与无人机运行场景](../../img/air/openhutb_yolo_mlp_control/traffic_simulation_scene.png)
 
@@ -133,7 +134,7 @@ touch "$TRAFFIC_DATA/follow_exit"
 
 Windows 11、Python 3.13.14、HUTB 2.10.0 / Town10HD 下完成车辆生成、记录与快照导出，采集约 215.14 秒，共 8 辆车、16688 条记录。WSL2 Ubuntu 22.04 / Python 3.10 下完成 90 秒仿真位姿跟随、暂停恢复、手动结束和 API 控制释放验证；新增 6 项测试及原有测试共 31 项通过。
 
-鼠标视角交互与退出后的控制状态已由操作者确认。
+鼠标视角交互与退出后的控制状态已由操作者确认。修订后从道路上方 2 米的空旷起点复测 60 秒，约 2.88 秒进入跟随，水平误差中位数约 0.40 米、结束时约 2.59 米；该结果来自 HUTB 2.10.0，不代表 CarlaAir 的验证结果。
 
 返回[文档目录](README.md)。
 

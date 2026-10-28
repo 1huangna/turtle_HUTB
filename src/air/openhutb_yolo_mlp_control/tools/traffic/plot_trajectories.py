@@ -56,7 +56,7 @@ def main():
                title='B  |  Vehicle speed')
     speeds.grid(alpha=0.2)
     fig.suptitle(f'{meta["map"]} — Traffic Manager vehicle trajectory recording', fontsize=15)
-    rate = meta.get('sampling_hz_wall', 10)
+    rate = meta.get('sampling_hz_actual', meta.get('sampling_hz_requested', meta.get('sampling_hz_wall', 10)))
     fig.text(0.5, 0.015, f'{len(groups)} vehicles | {meta["duration_wall_s"]:.1f} s capture'
              f' | CARLA ground truth | approx. {rate:g} Hz wall-clock sampling',
              ha='center', fontsize=9, color='#444444')

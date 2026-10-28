@@ -1,11 +1,14 @@
 """Shared telemetry and coordinate helpers; no simulator imports."""
 
+import argparse
 import json
 import math
 import os
 import statistics
 import time
 from pathlib import Path
+
+REFERENCE_LIMIT = 20
 
 
 def write_json(path, data):
@@ -56,3 +59,33 @@ def step_towards(current, target, maximum):
     distance = math.dist(current, target)
     scale = min(1.0, maximum / max(distance, 1e-9))
     return [a + (b - a) * scale for a, b in zip(current, target)]
+
+
+def follow_phase(current, target, altitude_tolerance=2.0):
+    return 'climb' if abs(current[2] - target[2]) > altitude_tolerance else 'follow'
+
+
+def positive(value):
+    number = float(value)
+    if not math.isfinite(number) or number <= 0:
+        raise argparse.ArgumentTypeError('Must be positive and finite')
+    return number
+
+
+def limited_references(references, limit=REFERENCE_LIMIT):
+    return list(references[:limit])
+
+
+def actual_sampling_rate(sample_count, elapsed):
+    if sample_count < 2 or elapsed <= 0:
+        return 0.0
+    return (sample_count - 1) / elapsed
+
+
+def follow_step(current, target, maximum):
+    """Reserve climb progress while retaining a bounded horizontal approach."""
+    if abs(current[2] - target[2]) <= 2:
+        return step_towards(current, target, maximum)
+    dz = max(-maximum / math.sqrt(2), min(maximum / math.sqrt(2), target[2] - current[2]))
+    horizontal = step_towards(current[:2], target[:2], math.sqrt(max(0, maximum ** 2 - dz ** 2)))
+    return [*horizontal, current[2] + dz]

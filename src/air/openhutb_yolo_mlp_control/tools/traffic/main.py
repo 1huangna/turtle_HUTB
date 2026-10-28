@@ -8,7 +8,8 @@ import random
 import time
 from pathlib import Path
 
-from common import write_json
+from common import (REFERENCE_LIMIT, actual_sampling_rate, limited_references,
+                    positive, write_json)
 
 ROLE = 'openhutb_traffic_demo'
 
@@ -26,12 +27,19 @@ def connect(args):
 def export_references(world, directory):
     import carla
     references = []
+    total_references = 0
     for obj in world.get_environment_objects(carla.CityObjectLabel.Any):
         if obj.name.endswith('_SM_0') and not obj.name.startswith('Instanced'):
+            total_references += 1
             p = obj.transform.location
-            references.append({'name': obj.name[:-5], 'carla': [p.x, p.y, p.z]})
+            if len(references) < REFERENCE_LIMIT:
+                references.append({'name': obj.name[:-5], 'carla': [p.x, p.y, p.z]})
+    selected = limited_references(references)
     write_json(directory / 'references.json',
-               {'map': world.get_map().name, 'references': references})
+               {'map': world.get_map().name,
+                'references': selected,
+                'reference_count': len(selected),
+                'reference_count_total': total_references})
 
 
 def spawn(args):
@@ -76,6 +84,14 @@ def spawn(args):
                 pass  # World may already have been closed.
 
 
+def clean(args):
+    _, world = connect(args)
+    actors = [actor for actor in world.get_actors().filter('vehicle.*')
+              if actor.attributes.get('role_name') == ROLE]
+    removed = sum(bool(actor.destroy()) for actor in actors)
+    print(f'Cleaned {removed}/{len(actors)} managed vehicles.', flush=True)
+
+
 def record(args):
     _, world = connect(args)
     directory = args.output.resolve()
@@ -90,6 +106,9 @@ def record(args):
         start = time.monotonic()
         previous = None
         rows = 0
+        sample_count = 0
+        first_sample_time = None
+        last_sample_time = None
         print(f'Recording {map_name} to {directory}', flush=True)
         try:
             while args.duration == 0 or time.monotonic() - start < args.duration:
@@ -100,6 +119,11 @@ def record(args):
                     time.sleep(1 / args.hz)
                     continue
                 previous = snapshot.frame
+                sample_count += 1
+                sample_time = time.monotonic()
+                if first_sample_time is None:
+                    first_sample_time = sample_time
+                last_sample_time = sample_time
                 now = time.time()
                 vehicles = []
                 for actor in world.get_actors().filter('vehicle.*'):
@@ -123,17 +147,14 @@ def record(args):
                 time.sleep(1 / args.hz)
         finally:
             write_json(directory / 'metadata.json',
-                       {'map': map_name, 'duration_wall_s': time.monotonic() - start,
-                        'rows': rows, 'sampling_hz_wall': args.hz,
+                        {'map': map_name, 'duration_wall_s': time.monotonic() - start,
+                        'rows': rows, 'sampling_hz_requested': args.hz,
+                        'sampling_hz_actual': actual_sampling_rate(
+                            sample_count,
+                            last_sample_time - first_sample_time
+                            if sample_count > 1 else 0),
                         'coordinates': 'CARLA world, left-handed, metres',
                         'source': 'CARLA actor ground truth'})
-
-
-def positive(value):
-    number = float(value)
-    if not math.isfinite(number) or number <= 0:
-        raise argparse.ArgumentTypeError('Must be positive and finite')
-    return number
 
 
 def main():
@@ -149,13 +170,14 @@ def main():
     recorder.add_argument('--output', type=Path, required=True)
     recorder.add_argument('--duration', type=float, default=90, help='Seconds; 0 until Ctrl+C')
     recorder.add_argument('--hz', type=positive, default=10)
+    commands.add_parser('clean', help='Destroy managed vehicles left by an interrupted spawn')
     args = parser.parse_args()
     if args.command == 'spawn' and args.count < 1:
         parser.error('--count must be at least 1')
     if args.command == 'record' and (not math.isfinite(args.duration) or args.duration < 0):
         parser.error('--duration must be finite and nonnegative')
     try:
-        (spawn if args.command == 'spawn' else record)(args)
+        {'spawn': spawn, 'record': record, 'clean': clean}[args.command](args)
     except KeyboardInterrupt:
         print('Stopped.')
 
