@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+
+<html class="writer-html5" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="img/favicon.ico" rel="shortcut icon"/>
+<title>首页 - 模拟器的 ROS 文档</title>
+<link href="css/theme.css" rel="stylesheet"/>
+<link href="css/theme_extra.css" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" rel="stylesheet"/>
+<link href="extra.css" rel="stylesheet"/>
+<script>
+        // Current page data
+        var mkdocs_page_name = "\u9996\u9875";
+        var mkdocs_page_input_path = "index.md";
+        var mkdocs_page_url = null;
+      </script>
+<!--[if lt IE 9]>
+      <script src="js/html5shiv.min.js"></script>
+    <![endif]-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+<script>hljs.highlightAll();</script>
+</head>
+<body class="wy-body-for-nav" role="document">
+<div class="wy-grid-for-nav">
+<nav class="wy-nav-side stickynav" data-toggle="wy-nav-shift">
+<div class="wy-side-scroll">
+<div class="wy-side-nav-search">
+<a class="icon icon-home" href="."> 模拟器的 ROS 文档
+        </a><div role="search">
+<form action="./search.html" class="wy-form" id="rtd-search-form" method="get">
+<input aria-label="Search docs" name="q" placeholder="搜索文档" title="Type search term here" type="text"/>
+</form>
+</div>
+</div>
+<div aria-label="Navigation menu" class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation">
+<p class="caption"><span class="caption-text">入门</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal current" href="#">首页</a>
+<ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="#1">1. 入门 </a>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#2">2. 人形机器人 </a>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#3">3. 肌肉骨骼人 </a>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#4">4. 地面载具  </a>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#5">5. 空域载具 </a>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#6">6. 水域载具  </a>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#_1">参考文献</a>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ubuntu20.04/">安装 ROS</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="chap2/ros2_pubsub_py/">ROS2 话题发布订阅基础实验（talker/listener）</a>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">ROS 教程</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="chapter/chap1/chap1/">1. 认识 ROS</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="chapter/chap2/">2. ROS 基础 - ROS 基础</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="chapter/chap3/">3. 机器人系统设计</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="chapter/chap4/">4. 机器人仿真</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="chapter/chap5/">5. 机器人感知</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="chapter/chap6/">6. 机器人 SLAM 与自主导航</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="chapter/chap7/">7. 阿克曼四轮小车运动控制</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="chapter/chap8/">8. ROS 机器人综合应用</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="chapter/chap9/">9. ROS 2</a>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">人形机器人</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="humanoid/humanoid_basics/">人形机器人基础</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="humanoid/humanoid_keyboard_control/">人形机器人键盘运动控制</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="humanoid/panda_keyboard_control/">键盘操控仿真机械臂</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="humanoid/humanoid_push_recovery/">人形机器人平衡控制与外力抗扰恢复</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="humanoid/humanoid_ppo_locomotion/">人形机器人 PPO 神经网络平衡控制</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="humanoid/humanoid_lidar_nn_perception/">人形机器人 2D 激光雷达 CNN 感知与避障</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="humanoid/humanoid_local_planner_bench/">人形足迹下的局部避障算法对比</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="humanoid/mujoco_hopper_demo/">MuJoCo单足弹跳机器人简单仿真</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="humanoid/humanoid_stair_climb/">人形上下台阶步态仿真</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="humanoid/ros_topic_demo/">ROS虚拟机器人圆形轨迹rviz可视化示例</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="waypoint_publisher/">ROS2 Humble 路径点发布器</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="humanoid/whole_body_ik/">人形机器人全身逆运动学与可操作性</a>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">肌肉骨骼人</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="musculoskeletal/musculoskeletal_basics/">肌肉骨骼人基础</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="musculoskeletal/msk_hand_teleop/">MuJoCo肌肉骨骼灵巧手遥操作与NN控制</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="musculoskeletal/muscle_joint_control/">肌肉驱动的关节控制与 Hill 肌肉模型</a>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">地面载具</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="set_up_and_connect_to_carla/">手动控制</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ground/mnist_digit_control/">MNIST 手写数字视觉感知与机器人运动控制</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ground/carla_spawn_objects/">生成对象</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ground/carla_keyboard_control/">地面载具物理仿真与键盘运动控制</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ground/carla_yolo_avoidance/">CARLA+YOLOv8 目标检测感知与减速避障</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ground/ackermann_control/">阿克曼控制</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ground/carla_perception_control/">传感器感知与给定轨迹跟踪（神经网络版）</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ground/r2d2_cruise/">R2D2小车 自动巡航</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ground/waypoint/">路径点发布器</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ground/carla_mapping_navigation/">激光雷达建图与神经网络规划导航</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ground/ad_agent/">自动驾驶代理</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ground/ad_demo/">自动驾驶示例</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ground/rostopic_cruise/">rostopic 手动驱动</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ground/ros_scenario_runner/">ROS Scenario Runner</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ground/rviz_plugin/">RVIZ Carla 插件</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ground/carla_traffic_sign_recognition/">交通标志识别（Windows 端脚本）</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ground/carla_parking_lot/">停车场场景生成</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ground/yolov8_target_tracking/">YOLOv8 视觉感知目标跟随</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ground/carla_tsr_ros/">交通标志识别 ROS 封装</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ground/vehicle_pygame_teleop/">车辆键盘遥操作与二维模拟</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ground/pcl_recorder/">点云地图创建</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ground/turtlebot3_lidar_avoid/">TurtleBot3 激光雷达自主避障（ROS 2）</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ground/mujoco_diff_drive_slip_compensation/">MuJoCo 差速小车轮滑感知与轨迹补偿</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ground/mujoco_car_avoidance/">MuJoCo 地面小车射线感知与分级减速避障</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ground/mujoco_car_nn_avoidance/">MuJoCo 地面小车神经网络端到端避障</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ground/car_2d_target_tracker/">2D 小车目标追踪仿真</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ground/carla_nn_car_following/">神经网络自适应跟车(ACC)</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ground/carla_aeb_braking/">自动紧急制动（AEB）</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ground/weather_perception_benchmark/">恶劣雨雾天气下多传感器感知性能对比实验</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ground/turtlebot3_auto_nav/">TurtleBot3 自主导航与避障参数优化</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ground/cliff_brake/">悬崖边缘紧急制动仿真</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ground/lidar_autoencoder_repair/">基于 Autoencoder 的雷达数据修复与避障</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ground/carla_auto_light/">地面载具灯光自动控制</a>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">空域载具</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal">无人机任务管理与安全状态机</a>
+<ul>
+<li class="toctree-l2"><a class="reference internal" href="air/uav_mission_safety_manager/overview/">模块概览</a>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="air/uav_mission_safety_manager/usage/">构建与运行</a>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="air/uav_mission_safety_manager/airsim_validation/">AirSim 实测记录</a>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="air/landing_assessment/">无人机着陆阶段识别与接地载荷预测</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="air/payload_mass_estimation/">无人机载荷质量估计</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="air/flight_pattern_recognition/">无人机飞行轨迹类型识别与 ROS2 自动任务日志</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="air/telemetry_diagnostics/">无人机遥测异常检测与 ROS2 在线诊断</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="air/setup_and_connect/">建立虚拟机和空域载具之间的连接</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="air/ros_pkgs/">空域模拟器的 ROS 封装器</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="air/carlair_ros_bridge/">无人机与 ROS 的桥接模块</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="air/rooftop_landing/">无人机屋顶降落</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="air/uav_keyboard_control/">无人机键盘控制</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="air/uav_ppo_nav/">基于 PPO 的无人机导航避障</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="air/uav_rl_benchmark/">强化学习对比实验（PPO/SAC/TD3）</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="air/uav_neural_residual_control/">神经残差动力学与学习式轨迹跟踪</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="air/uav_route_cruise/">基于 PPO 的无人机固定路线巡航</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="air/uav_dqn_nav/">基于 DQN 的无人机导航避障</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="air/drone_teleop/">无人机终端键盘遥控器</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="air/drone_ros_teleop/">基于 ROS 消息解耦的无人机键盘遥控</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="air/state_prediction/">基于 GRU 的无人机飞行状态预测与 ROS2 在线误差分析</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="air/uav_mujoco_sim/">MuJoCo 四旋翼仿真与 ROS2 桥接底座</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="air/uav_formation_flight/">无人机编队飞行</a>
+</li>
+<li class="toctree-l1"><a class="" href="https://openhutb.github.io/air_doc/airsim_tutorial_pkgs/">低空载具的 ROS 示例教程</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ap_cpp_overfomo/">AP-CPP 主动感知覆盖路径规划</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="air/rflysim_sitl_first_flight/">RflySim 单机起飞（补充实验）</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="air/waypoint_tracking/">无人机航点轨迹跟踪（PID 控制）</a>
+</li>
+<li class="toctree-l1"><a class="reference internal">空域载具八叉树三维寻路</a>
+<ul>
+<li class="toctree-l2"><a class="reference internal" href="air/octree_uav_3d_pathfinding/env_setup/">环境配置与前置准备</a>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="air/octree_uav_3d_pathfinding/flight_control/">AirSim 载具与位置控制</a>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="air/octree_uav_3d_pathfinding/occupancy_mapping/">点云转八叉树占用地图</a>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="air/octree_uav_3d_pathfinding/astar_planning/">八叉树上的 A* 全局寻路</a>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="air/octree_uav_3d_pathfinding/path_smoothing/">安全裕度与路径平滑</a>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="air/octree_uav_3d_pathfinding/path_following/">路径跟踪与闭环飞行</a>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal">YOLO 感知与无人机控制</a>
+<ul>
+<li class="toctree-l2"><a class="reference internal" href="air/openhutb_yolo_mlp_control/yolo_trajectory_control/">YOLO 感知与八字轨迹控制</a>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="air/openhutb_yolo_mlp_control/yolo_visual_centering/">YOLO 目标水平视觉居中</a>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="air/openhutb_yolo_mlp_control/traffic_tracking/">Traffic Manager 车辆轨迹与 AirSim 跟随</a>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="air/no_fly_zone_check/">禁飞区检测</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="air/allocnet_teleop/">AllocNet 四旋翼避障规划与键盘遥操作</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="air/uav_semantic_mapping_nav/">语义分割建图与语义路径规划</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="air/drone_trajectory_logger/">状态识别与轨迹绘制</a>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">水域载具</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="water/HoloOcean/">水域载具 ROS2 接口</a>
+</li>
+<li class="toctree-l1"><a class="reference internal">环境搭建</a>
+<ul>
+<li class="toctree-l2"><a class="reference internal" href="water/HoloOcean-Windows-Setup/">HoloOcean Windows 本机环境搭建</a>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="water/WSL_HoloOcean2_ROS2/">WSL跑通HoloOcean2的ROS2示例方法</a>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="water/docker/">Docker 开发环境</a>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="water/docker_runtime/">HoloOcean ROS2 运行时容器</a>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="water/holoocean_examples/">水域载具示例</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="water/rov_physical_simulation/">水下机器人物理仿真与 6-DOF 键盘运动控制</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="water/rov_trajectory_tracking/">水下多传感器感知与 3D 轨迹跟踪控制</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="water/rov_sonar_slam_navigation/">水下声呐 SLAM 占据栅格建图与自主避障导航</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="water/mjc_rov_sonar_cnn/">侧扫声呐图像仿真与 CNN 海底目标分类</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="water/mjc_rov_current_teleop/">动态洋流 ROV 键盘遥操与 MLP 巡航控制</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="water/underwater_sonar_mapping/">新增水下三维地形测绘模块</a>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="ubuntu2004-local-llm-deploy/">自装ubuntu20.04本地大模型部署教程</a>
+</li>
+</ul>
+</div>
+</div>
+</nav>
+<section class="wy-nav-content-wrap" data-toggle="wy-nav-shift">
+<nav aria-label="Mobile navigation menu" class="wy-nav-top" role="navigation">
+<i class="fa fa-bars" data-toggle="wy-nav-top"></i>
+<a href=".">模拟器的 ROS 文档</a>
+</nav>
+<div class="wy-nav-content">
+<div class="rst-content"><div aria-label="breadcrumbs navigation" role="navigation">
+<ul class="wy-breadcrumbs">
+<li><a aria-label="Docs" class="icon icon-home" href="."></a></li>
+<li class="breadcrumb-item">入门</li>
+<li class="breadcrumb-item active">首页</li>
+<li class="wy-breadcrumbs-aside">
+<a href="https://github.com/OpenHUTB/ros2/edit/master/docs/index.md"> 编辑页面</a>
+</li>
+</ul>
+<hr/>
+</div>
+<div class="document" itemscope="itemscope" itemtype="http://schema.org/Article" role="main">
+<div class="section" itemprop="articleBody">
+<div><h1 id="ros"><a href="https://github.com/OpenHUTB/ros2">模拟器的 ROS 文档</a></h1>
+<p>欢迎使用 OpenHUTB 的  ROS 文档 <sup id="fnref:macenski2022robot"><a class="footnote-ref" href="#fn:macenski2022robot">1</a></sup>。</p>
+<p><span id="submission-guide"></span>
+<strong>提交项目之前</strong>，请按以下指引自查，并阅读<a href="https://github.com/OpenHUTB/ros2#%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9">仓库提交约定</a>。PR 模板只列常见检查项；具体任务、模拟器和验收要求以老师及维护者说明为准。</p>
+<details>
+<summary>展开项目提交与复现指引</summary>
+<ol>
+<li><strong>确认提交范围。</strong> 在 Files changed 中逐个检查新增、修改和删除。不要提交 build、install、log 等无关生成目录、备份或重复文件，不用个人项目内容覆盖仓库首页及公共配置。需要修改公共内容时说明原因与影响。</li>
+<li><strong>整理模块与启动入口。</strong> 源码放在 src 对应模块，教程放在 docs 对应模块，文件使用英文下划线命名。提供 main.* 和 launch，核对包名、可执行名、依赖、模型路径及安装规则，完善实际包描述、维护信息和许可证。</li>
+<li><strong>按文档完整运行。</strong> README 写清实际验证的系统、ROS、Python、模拟器和关键依赖版本，以及获取源码、安装、构建、加载环境、启动和停止步骤，注明执行目录。建议从新终端操作，检查键盘输入、运动方向、状态切换、退出停车和异常清理。</li>
+<li><strong>准确说明验证范围。</strong> 区分节点启动、话题通信、可视化演示与完整仿真效果。固定速度发布不等于轨迹跟踪，离线测试不等于在线闭环验证。指标注明定义、单位、场景与测量方法，保留必要日志；未验证的内容和简化假设如实说明。</li>
+<li><strong>检查网页与配图。</strong> 新模块在本首页和 mkdocs.yml 增加入口，运行 <code>mkdocs serve --livereload</code> 检查相关页面、链接、公式和流程图。使用真实运行截图而非拍照，示意图明确标注；PNG 小于 3 MB、GIF 小于 10 MB，大量数据提供持久下载链接。</li>
+<li><strong>完成说明与复核。</strong> PR 标题和提交信息说明修改目的，使用大模型时声明具体工具并对内容负责。合并前至少一名其他人在另一台机器测试并同意，不能用作者自测替代。纯文档或局部修复按实际影响检查，不要求新增无关模块。</li>
+</ol>
+<p>以上结合仓库要求和复现建议整理，不作为新增评分标准。也可参阅<a href="https://github.com/OpenHUTB/doc#%E6%92%B0%E5%86%99%E8%A7%84%E8%8C%83">文档撰写约定</a>和<a href="https://github.com/OpenHUTB/.github/blob/master/CONTRIBUTING.md">贡献指南</a>。</p>
+</details>
+<ul>
+<li><a href="#list">简介</a></li>
+<li><a href="#list">入门</a></li>
+<li><a href="#humanoid">人形机器人</a></li>
+<li><a href="#musculoskeletal">肌肉骨骼人</a></li>
+<li><a href="#ground_vehicle">地面载具</a></li>
+<li><a href="no_fly_zone_check/">禁飞区检测模块</a></li>
+<li><a href="#air_vehicle">空域载具</a></li>
+<li><a href="#water_vehicle">水域载具</a></li>
+</ul>
+<hr/>
+<h2 id="1">1. 入门 <span id="list"></span></h2>
+<p>ROS 相关资料（<a href="https://pan.baidu.com/s/1viua4SZ7tP2DtU2XlCRKPg?pwd=hutb">网盘下载地址</a>）：</p>
+<ul>
+<li>教材：ROS教材.pdf</li>
+<li>课件和视频：ROS资料.zip</li>
+<li>安装好 ros kinetic 的虚拟机（密码：rosindustrial）Ubuntu 16.04：*.ova</li>
+<li>Windows虚拟机（密钥：ZF3R0-FHED2-M80TY-8QYGC-NPKYF）：*.exe</li>
+<li>补充：<a href="ubuntu%E4%B8%8B%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%9A%84%E8%BF%90%E8%A1%8C%E6%96%B9%E5%BC%8F/">ubuntu下虚拟机的运行方式</a></li>
+<li><a href="vm_introduction/">虚拟机环境介绍</a></li>
+<li>补充：<a href="ubuntu20.04/">Ubuntu 20.04 安装 ROS Noetic 详细教程</a></li>
+</ul>
+<p><a href="https://ww2.mathworks.cn/support/product/robotics/ros2-vm-installation-instructions-v9.html">下载</a>并安装好 ROS 的虚拟机。此虚拟机基于 Linux （Ubuntu 20.04 <code>lsb_release -a</code>）操作系统，并已预先配置为支持使用 ROS （ROS 1 Noetic 和 ROS 2 Humble） 构建的应用程序。</p>
+<p>ROS每章节运行代码:</p>
+<ul>
+<li><a href="chapter/chap1/chap1/">第 1 章</a> - 认识 ROS</li>
+<li><a href="chapter/chap2/">第 2 章</a> - ROS 基础</li>
+<li><a href="chapter/chap3/">第 3 章</a> - 机器人系统设计</li>
+<li><a href="chapter/chap4/">第 4 章</a> - 机器人仿真</li>
+<li><a href="chapter/chap5/">第 5 章</a> - 机器人感知</li>
+<li><a href="chapter/chap6/">第 6 章</a> - 机器人 SLAM 与自主导航</li>
+<li><a href="chapter/chap7/">第 7 章</a> - 阿克曼四轮小车运动控制</li>
+<li><a href="chapter/chap8/">第 8 章</a> - ROS 机器人综合应用</li>
+<li><a href="chapter/chap9/">第 9 章</a> - ROS 2</li>
+</ul>
+<p>ROS 2 话题发布订阅基础实验（talker/listener）：<a href="chap2/ros2_pubsub_py/">chap2/ros2_pubsub_py</a></p>
+<h2 id="2">2. 人形机器人 <span id="humanoid"></span></h2>
+<ul>
+<li><a href="humanoid/humanoid_basics/">人形机器人基础</a></li>
+<li><a href="humanoid/humanoid_keyboard_control/">人形机器人键盘运动控制</a></li>
+<li><a href="humanoid/humanoid_push_recovery/">人形机器人平衡控制与外力抗扰恢复</a></li>
+<li><a href="humanoid/humanoid_ppo_locomotion/">人形机器人 PPO 神经网络平衡控制</a></li>
+<li><a href="humanoid/humanoid_lidar_nn_perception/">人形机器人 2D 激光雷达 CNN 感知与避障</a></li>
+<li><a href="humanoid/humanoid_local_planner_bench/">人形足迹下的局部避障算法对比</a></li>
+<li><a href="humanoid/mujoco_hopper_demo/">MuJoCo单足弹跳机器人简单仿真</a></li>
+<li><a href="humanoid/humanoid_stair_climb/">人形上下台阶步态仿真</a></li>
+<li><a href="humanoid/ros_topic_demo/">ROS虚拟机器人圆形轨迹rviz可视化示例</a></li>
+<li><a href="humanoid/whole_body_ik/">人形机器人全身逆运动学与可操作性</a></li>
+</ul>
+<h2 id="3">3. 肌肉骨骼人 <span id="musculoskeletal"></span></h2>
+<ul>
+<li><a href="musculoskeletal/musculoskeletal_basics/">肌肉骨骼人基础</a></li>
+<li>
+<p><a href="musculoskeletal/msk_hand_teleop/">MuJoCo 肌肉骨骼灵巧手：键盘遥操作与神经网络肌肉激活控制</a></p>
+</li>
+<li>
+<p><a href="musculoskeletal/muscle_joint_control/">肌肉驱动的关节控制与 Hill 肌肉模型</a></p>
+</li>
+</ul>
+<h2 id="4">4. 地面载具  <span id="ground_vehicle"></span></h2>
+<ul>
+<li><a href="set_up_and_connect_to_carla/">手动控制</a></li>
+<li><a href="ground/mnist_digit_control/">MNIST 手写数字视觉感知与机器人运动控制</a> —— CNN 识别手写数字为运动指令，防抖确认后控制 turtlesim 平移/旋转</li>
+<li><a href="ground/carla_spawn_objects/">生成对象</a></li>
+<li><a href="ground/carla_keyboard_control/">地面载具物理仿真与键盘运动控制</a></li>
+<li><a href="ground/carla_yolo_avoidance/">CARLA+YOLOv8 目标检测感知与减速避障</a></li>
+<li><a href="ground/ackermann_control/">阿克曼控制</a></li>
+<li><a href="ground/carla_perception_control/">传感器感知与给定轨迹跟踪（神经网络版）</a></li>
+<li><a href="ground/r2d2_cruise/">R2D2小车自动巡航仿真</a></li>
+<li><a href="ground/waypoint/">路径点发布器</a></li>
+<li><a href="ground/carla_mapping_navigation/">激光雷达建图与神经网络规划导航</a></li>
+<li><a href="ground/ad_agent/">自动驾驶代理</a></li>
+<li><a href="ground/ad_demo/">自动驾驶示例</a></li>
+<li><a href="ground/rostopic_cruise/">rostopic 手动驱动</a></li>
+<li><a href="ground/ros_scenario_runner/">ROS Scenario Runner</a></li>
+<li><a href="ground/rviz_plugin/">RVIZ Carla 插件</a></li>
+<li><a href="ground/twist_to_control/">扭转控制</a></li>
+<li><a href="ground/rqt_plugin/">RQT 插件</a></li>
+<li><a href="ground/pcl_recorder/">点云地图创建</a></li>
+<li>
+<p><a href="ground/carla_traffic_sign_recognition/">Carla 交通标志识别（Windows 脚本）</a> - 基于 YOLOv8 的实时感知与键盘控制</p>
+</li>
+<li>
+<p><a href="ground/yolov8_target_tracking/">YOLOv8 视觉感知目标跟随仿真</a></p>
+</li>
+<li>
+<p><a href="ground/vehicle_pygame_teleop/">车辆键盘遥操作与二维模拟</a></p>
+</li>
+<li>
+<p><a href="ground/turtlebot3_lidar_avoid/">TurtleBot3 激光雷达自主避障（ROS 2）</a> —— 订阅机载激光雷达，按扇区提取前/左/右最近距离，经三态状态机与势场法决策后发布 /cmd_vel，实现迷宫场景自主避障</p>
+</li>
+<li>
+<p><a href="ground/mujoco_diff_drive_slip_compensation/">MuJoCo 差速小车轮滑感知与轨迹补偿</a></p>
+</li>
+<li><a href="ground/mujoco_car_avoidance/">MuJoCo 地面小车射线感知与分级减速避障</a></li>
+<li><a href="ground/mujoco_car_nn_avoidance/">MuJoCo 地面小车神经网络端到端避障</a></li>
+<li><a href="ground/car_2d_target_tracker/">2D 小车目标追踪仿真</a></li>
+<li><a href="ground/carla_nn_car_following/">基于神经网络的无人小车自适应跟车（ACC）</a></li>
+<li><a href="ground/weather_perception_benchmark/">恶劣雨雾天气下多传感器感知性能对比实验</a></li>
+<li><a href="ground/turtlebot3_auto_nav/">TurtleBot3 仿真自主导航与避障参数优化</a></li>
+<li><a href="ground/image_recorder/">图像录制 ROS 2 封装模块</a></li>
+<li><a href="ground/cliff_brake/">悬崖边缘紧急制动仿真</a> —— 用 MuJoCo 物理引擎与 ROS 三节点闭环实现车头测距触发的滞回紧急制动，附安全包络定量测试与坠落对照</li>
+<li><a href="ground/lidar_autoencoder_repair/">基于 Autoencoder 的雷达数据修复与避障</a> —— 离线训练自编码器去除传感器噪声，修复后数据送入阈值避障控制链路，展示传感器数据容错层与控制层解耦的设计</li>
+<li><a href="ground/carla_auto_light/">地面载具灯光自动控制</a></li>
+</ul>
+<h2 id="5">5. 空域载具 <span id="air_vehicle"></span></h2>
+<ul>
+<li>
+<p><a href="air/landing_assessment/">无人机着陆阶段识别与接地载荷预测</a></p>
+</li>
+<li>
+<p><a href="air/payload_mass_estimation/">无人机载荷质量估计</a></p>
+</li>
+<li>
+<p><a href="air/uav_mission_safety_manager/overview/">无人机任务管理与安全状态机</a></p>
+</li>
+<li>
+<p><a href="air/flight_pattern_recognition/">无人机飞行轨迹类型识别与 ROS2 自动任务日志</a></p>
+</li>
+<li>
+<p><a href="air/telemetry_diagnostics/">无人机遥测异常检测与 ROS2 在线诊断</a></p>
+</li>
+<li>
+<p><a href="air/setup_and_connect/">建立虚拟机和空域载具之间的连接</a></p>
+</li>
+<li>
+<p><a href="air/octree_uav_3d_pathfinding/env_setup/">空域载具的八叉树三维寻路</a></p>
+</li>
+<li>
+<p><a href="air/octree_uav_3d_pathfinding/occupancy_mapping/">点云转八叉树占用地图</a></p>
+</li>
+<li>
+<p><a href="air/octree_uav_3d_pathfinding/astar_planning/">八叉树上的 A* 全局寻路</a></p>
+</li>
+<li>
+<p><a href="air/ros_pkgs/">空域模拟器的 ROS 封装器</a></p>
+</li>
+<li><a href="air/carlair_ros_bridge/">无人机与 ROS 的桥接模块</a></li>
+<li><a href="air/rooftop_landing/">无人机屋顶降落</a> —— 用机载 LiDAR 检测屋顶平面，取轮廓的最大内切圆圆心作为降落点，自主飞抵其上方后垂直降落</li>
+<li>
+<p><a href="air/uav_keyboard_control/">无人机键盘控制</a></p>
+</li>
+<li>
+<p><a href="air/uav_ppo_nav/">基于 PPO 的无人机导航避障</a></p>
+</li>
+<li>
+<p><a href="air/uav_route_cruise/">基于 PPO 的无人机固定路线巡航</a> —— 沿给定闭合航线巡航，遇压在航线上的障碍时临时偏离绕行</p>
+</li>
+<li>
+<p><a href="air/uav_rl_benchmark/">无人机导航强化学习对比实验（PPO/SAC/TD3）</a></p>
+</li>
+<li>
+<p><a href="air/uav_neural_residual_control/">神经残差动力学与学习式轨迹跟踪</a></p>
+</li>
+<li>
+<p><a href="air/uav_dqn_nav/">基于 DQN 的无人机导航避障</a> —— 与 PPO 同环境同观测，仅替换为 DQN 离散动作算法，用于端到端模型/算法对比</p>
+</li>
+<li>
+<p><a href="air/drone_teleop/">无人机终端键盘遥控器</a></p>
+</li>
+<li>
+<p><a href="air/drone_ros_teleop/">基于 ROS 消息解耦的无人机键盘遥控</a></p>
+</li>
+<li>
+<p><a href="air/waypoint_tracking/">无人机航点轨迹跟踪（PID 控制）</a></p>
+</li>
+<li>
+<p><a href="air/state_prediction/">基于 GRU 的无人机飞行状态预测与 ROS2 在线误差分析</a></p>
+</li>
+<li>
+<p><a href="air/uav_mujoco_sim/">MuJoCo 四旋翼仿真与 ROS2 桥接底座</a></p>
+</li>
+<li>
+<p><a href="air/uav_formation_flight/">无人机编队飞行</a> —— 长机按航点巡航、僚机保持队形（一字/纵队/三角可动态切换），三架共用一条 AirSim RPC，依次起飞、低空展开后进入任务</p>
+</li>
+<li>
+<p><a href="https://openhutb.github.io/air_doc/airsim_tutorial_pkgs/">低空载具的 ROS 示例教程</a></p>
+</li>
+<li>
+<p><a href="ap_cpp_overfomo/">AP-CPP 主动感知覆盖路径规划</a> —— 基于 AirSim 的无人机主动感知覆盖路径规划，在 OverFOMO 自适应覆盖规划的基础上进一步决定「该去哪里看」</p>
+</li>
+<li>
+<p><a href="air/openhutb_yolo_mlp_control/">YOLO 感知与无人机控制</a></p>
+</li>
+<li>
+<p><a href="air/uav_semantic_mapping_nav/">语义分割建图与语义路径规划</a></p>
+</li>
+<li>
+<p><a href="air/allocnet_teleop/">AllocNet 四旋翼避障规划与键盘遥操作</a> —— 在学习型时间分配的避障轨迹规划基础上，补齐键盘航点下发、地图常驻转发与轨迹记录的人机交互层</p>
+</li>
+<li>
+<p><a href="air/drone_trajectory_logger/">状态识别与轨迹绘制</a></p>
+</li>
+<li>
+<p><a href="air/rflysim_sitl_first_flight/">RflySim 单机起飞与端口故障排查（补充实验）</a></p>
+</li>
+</ul>
+<h2 id="6">6. 水域载具  <span id="water_vehicle"></span></h2>
+<ul>
+<li>
+<p><a href="water/HoloOcean/">水域载具 ROS2 接口</a></p>
+</li>
+<li>
+<p><a href="water/HoloOcean-Windows-Setup/">HoloOcean Windows 本机环境搭建</a> —— 在 Windows 上用 Conda 安装 Python 客户端、下载场景包并跑通第一个仿真</p>
+</li>
+<li>
+<p><a href="water/WSL_HoloOcean2_ROS2/">WSL 跑通 HoloOcean2 的 ROS2 示例（无头模式）</a> —— 无 GPU 环境下用 <code>-nullrhi</code> 参数跑无头仿真</p>
+</li>
+<li>
+<p><a href="water/docker/">Docker 开发环境</a> —— 开发容器与工作空间挂载</p>
+</li>
+<li>
+<p><a href="water/docker_runtime/">HoloOcean ROS2 运行时容器</a> —— 用 <code>build_container.sh</code> 构建运行时镜像</p>
+</li>
+<li>
+<p><a href="water/holoocean_examples/">水域载具示例（手柄 / 航点 / 深度航向指令）</a> —— 多代理手柄控制、相机 HUD 与配置文件结构</p>
+</li>
+<li>
+<p><a href="water/rov_physical_simulation/">水下机器人物理仿真与 6-DOF 键盘运动控制</a></p>
+</li>
+<li>
+<p><a href="water/rov_trajectory_tracking/">水下多传感器感知与 3D 轨迹跟踪控制</a></p>
+</li>
+<li>
+<p><a href="water/rov_sonar_slam_navigation/">水下声呐 SLAM 占据栅格建图与自主避障导航</a></p>
+</li>
+<li>
+<p><a href="water/underwater_sonar_mapping/">新增水下三维地形测绘模块</a></p>
+</li>
+<li>
+<p><a href="water/mjc_rov_current_teleop/">动态洋流 ROV 键盘遥操与 MLP 巡航控制</a></p>
+</li>
+<li>
+<p><a href="water/mjc_rov_sonar_cnn/">侧扫声呐图像仿真与 CNN 海底目标分类</a></p>
+</li>
+</ul>
+<hr/>
+<p>如果对文档中的任何问题可以在 <a href="https://github.com/OpenHUTB/ros2">本文档的源码仓库</a> 中的 <a href="https://github.com/OpenHUTB/ros2/issues">问题</a> 页面讨论或者提交 <a href="https://github.com/OpenHUTB/.github/blob/master/CONTRIBUTING.md">拉取请求</a> 直接修改文档。</p>
+<hr/>
+<h2 id="_1">参考文献</h2>
+<div class="footnote">
+<hr/>
+<ol>
+<li id="fn:macenski2022robot">
+<p>Macenski, S., Foote, T., Gerkey, B., Lalancette, C. &amp; Woodall, W. Robot operating system 2: Design, architecture, and uses in the wild. <em>Science robotics</em> <strong>7</strong>, eabm6074 (2022). <a class="footnote-backref" href="#fnref:macenski2022robot" title="Jump back to footnote 1 in the text">↩</a></p>
+</li>
+</ol>
+</div></div>
+</div>
+</div><footer>
+<div aria-label="Footer Navigation" class="rst-footer-buttons" role="navigation">
+<a class="btn btn-neutral float-right" href="ubuntu20.04/" title="安装 ROS">后一页 <span class="icon icon-circle-arrow-right"></span></a>
+</div>
+<hr>
+<div role="contentinfo">
+<!-- Copyright etc -->
+<p>OpenHUTB 版权所有 © 2026</p>
+</div>
+</hr></footer>
+</div>
+</div>
+</section>
+</div>
+<div aria-label="Versions" class="rst-versions" role="note">
+<span class="rst-current-version" data-toggle="rst-current-version">
+<span>
+<a href="https://github.com/OpenHUTB/ros2" style="color: #fcfcfc">OpenHUTB</a>
+</span>
+<span><a href="ubuntu20.04/" style="color: #fcfcfc">后一页 »</a></span>
+</span>
+</div>
+<script src="js/jquery-3.6.0.min.js"></script>
+<script>var base_url = ".";</script>
+<script src="js/theme_extra.js"></script>
+<script src="js/theme.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.2.7/raphael.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-sequence-diagrams/1.0.6/sequence-diagram-min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flowchart/1.6.5/flowchart.min.js"></script>
+<script src="js/umlconvert.js"></script>
+<script src="search/main.js"></script>
+<script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+</body>
+</html>
