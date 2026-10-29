@@ -61,6 +61,28 @@ def step_towards(current, target, maximum):
     return [a + (b - a) * scale for a, b in zip(current, target)]
 
 
+def velocity_towards(current, target, maximum_speed, gain=1.0,
+                     previous=None, dt=0.2, max_acceleration=3.0,
+                     target_velocity=None):
+    """Return a bounded, acceleration-limited world-frame velocity command."""
+    delta = [b - a for a, b in zip(current, target)]
+    feedforward = (target_velocity if target_velocity is not None
+                   else [0.0] * len(delta))
+    desired = [feedforward[i] + gain * delta[i] for i in range(len(delta))]
+    desired_length = math.sqrt(sum(value * value for value in desired))
+    if desired_length > maximum_speed:
+        desired = [value * maximum_speed / desired_length for value in desired]
+    if previous is None:
+        previous = [0.0] * len(desired)
+    change = [new - old for old, new in zip(previous, desired)]
+    change_length = math.sqrt(sum(value * value for value in change))
+    maximum_change = max_acceleration * min(max(dt, 0.0), 0.25)
+    if change_length > maximum_change:
+        scale = maximum_change / change_length
+        change = [value * scale for value in change]
+    return [old + value for old, value in zip(previous, change)]
+
+
 def follow_phase(current, target, altitude_tolerance=2.0):
     return 'climb' if abs(current[2] - target[2]) > altitude_tolerance else 'follow'
 

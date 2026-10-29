@@ -1,15 +1,15 @@
-# Traffic Manager 车辆轨迹与仿真位姿跟随
+# Traffic Manager 车辆轨迹与 AirSim 跟随
 
-本示例提供 Traffic Manager 车辆生成、轨迹记录、快照导出和可选的无人机仿真位姿跟随，默认跟随点位于车辆后方 12 米、上方 25 米。
+本示例提供 Traffic Manager 车辆生成、轨迹记录、快照导出和可选的 AirSim 无人机跟随，默认跟随点位于车辆后方 12 米、上方 25 米。
 
-**目标位置来自 CARLA 车辆坐标，尚未接入 YOLO 视觉闭环，也不能据此认定无人机动力学跟随已经验证通过。** 跟随使用增量 `simSetVehiclePose`，保留当前朝向。
+**目标位置来自 CARLA 车辆坐标，尚未接入 YOLO 视觉闭环，也不能据此认定无人机动力学跟随已经验证通过。** 默认使用 `auto` 控制模式并保留当前朝向：模拟器飞控就绪时使用 AirSim 速度接口，否则使用增量位姿控制。
 
 ## 环境与入口
 
 入口位于功能包 `tools/traffic`，安装路径为 `share/openhutb_yolo_mlp_control/tools/traffic`，直接使用模拟器 API。
 
 - Windows：运行 OpenHUTB AIR 场景和匹配版本的 CARLA Python API；车辆生成与记录使用该环境。
-- WSL2 Ubuntu 22.04 / Python 3.10：运行随包提供的 AirSim 客户端和可选的位姿跟随。
+- WSL2 Ubuntu 22.04 / Python 3.10：运行随包提供的 AirSim 客户端和可选的无人机跟随。
 - 绘图依赖：`numpy`、`matplotlib`。AirSim 客户端依赖 `numpy`、`msgpack`。
 
 Windows 使用 HUTB 2.10.0 随附、与本机 Python 版本匹配的 wheel。
@@ -76,9 +76,9 @@ $runDir = Join-Path $env:USERPROFILE ('OpenHUTB/traffic_runs/' + (Get-Date -Form
 
 圆点和叉号分别表示记录起点和终点；速度曲线使用模拟时间与水平速度，行驶距离按相邻二维位置采样点累加。
 
-## 可选：WSL 仿真位姿跟随
+## 可选：WSL 仿真跟随
 
-记录入口使用 `--duration 0` 持续运行；位姿跟随默认运行 90 秒，结束时取消运动任务并释放 API 控制。
+记录入口使用 `--duration 0` 持续运行；无人机跟随默认运行 90 秒，结束时取消运动任务并恢复启动前的 API 控制状态。
 
 在第二个 PowerShell 终端（保留 `$repoDir` 和 `$runDir`）打开定位到同一源码目录的 WSL 终端，并打印本次数据目录的 WSL 路径：
 
@@ -106,12 +106,26 @@ with socket.create_connection((os.environ['AIRSIM_IP'], 41451), timeout=3):
     print('AirSim TCP reachable')
 PY
 python "$TOOLS_DIR/follow_vehicle.py" --data "$TRAFFIC_DATA" \
-  --host "$AIRSIM_IP" --enable-pose-control --duration 90
+  --host "$AIRSIM_IP" --enable-follow-control --control-mode auto \
+  --speed 2 --duration 90
 ```
+
+入口要求无人机已经在空中，不会自动起飞；跟随前请先用模拟器或现有飞行入口将无人机置于安全高度。`auto` 会根据 `ready` 状态选择控制后端；可用 `--control-mode pose` 强制使用位姿模式，或用 `--control-mode velocity` 强制使用原生速度模式。速度模式以车辆速度作为前馈，并按位置误差修正速度指令。
 
 脚本最多导出 20 个候选静态对象，至少匹配 5 个后校准 CARLA 与 AirSim 坐标，允许残差为 0.25 米，适用于坐标轴对齐、Z 方向相反的场景。默认选择附近移动车辆，可用 `--target-id` 指定。
 
-`drone_follow.csv` 记录无人机与期望点的 NED 坐标、水平误差、实际三维／水平速度和阶段；`follow_status.json` 保存运行与控制释放状态。碰撞、目标消失、地图改变或车辆数据超时会结束跟随。`--speed`（默认 12）是每秒位姿更新的最大位移，不是 AirSim 动力学速度；爬升阶段为垂直运动保留位移预算，同时水平逼近，三维总步长仍受上限约束。启动时取得 API 控制，结束时释放。请从空旷位置运行。默认保留碰撞检查，场景几何可能阻挡位姿更新；本工具不提供避障规划，也不保证实际达到该上限或追上车辆。`--ignore-collision` 可显式关闭碰撞检查，但可能使位姿穿过场景物体。
+`drone_follow.csv` 记录无人机、期望跟随点和实际导航点的 NED 坐标、水平误差、实际速度、阶段及速度指令；`follow_status.json` 保存实际后端和控制恢复状态。通过 `simGetCollisionInfo()` 检测到本轮新增碰撞、目标消失、地图改变或车辆数据超时会结束跟随；历史碰撞不作为本轮退出依据。`--speed`（默认 2 m/s）在原生速度模式下是 AirSim 世界坐标速度指令上限，在位姿模式下是每秒位姿更新步长上限；实际运动还受模拟器飞控状态、动力学和碰撞检查影响，不能保证达到该数值。结束时恢复启动前的 API 控制状态。
+
+可选的 `--avoid-obstacles` 使用 CARLA 场景射线查询检查前方通道，尝试短距离侧向或向上的中间航点；无可用路线时保持当前位置（`blocked`），查询失败时结束跟随。它依赖模拟器几何信息，不是 LiDAR／视觉感知，也不是八叉树全局规划；通道由离散射线采样，可能遗漏细小障碍，不能保证无碰撞或持续追上车辆。`--obstacle-margin` 默认 1.5 米，与 `--ignore-collision` 不可同时使用。
+
+启用前，在独立的 Windows PowerShell 终端使用匹配模拟器的 CARLA Python 启动只读查询服务：
+
+```powershell
+$rayHost = Read-Host '输入已验证可从 WSL 访问的 Windows IP'
+& $carlaPython "$toolsDir/obstacle_avoidance.py" --server --listen $rayHost
+```
+
+随后给上述 WSL 跟随命令加上 `--avoid-obstacles`；服务地址默认与 `--host` 相同，端口默认 41452，可用 `--obstacle-host` 和 `--obstacle-port` 修改。服务仅用于本地仿真测试，每次跟随重新启动一次。
 
 另一个 WSL 终端设置相同的 `TRAFFIC_DATA` 后，可暂停、恢复或结束跟随：
 
@@ -124,7 +138,7 @@ rm -f "$TRAFFIC_DATA/follow_pause"
 touch "$TRAFFIC_DATA/follow_exit"
 ```
 
-也可按 `Ctrl+C` 结束跟随；释放控制不执行降落或悬停。若 `spawn` 被强制终止而有车辆残留，可在 Windows 运行 `& $carlaPython "$toolsDir/main.py" clean` 清理 `role_name=openhutb_traffic_demo` 的车辆。
+也可按 `Ctrl+C` 结束跟随；恢复控制状态不执行降落或悬停，也不等同于键盘操控已验证恢复。若 `spawn` 被强制终止而有车辆残留，可在 Windows 运行 `& $carlaPython "$toolsDir/main.py" clean` 清理 `role_name=openhutb_traffic_demo` 的车辆。
 
 ![OpenHUTB 车辆与无人机运行场景](../../img/air/openhutb_yolo_mlp_control/traffic_simulation_scene.png)
 
@@ -132,9 +146,9 @@ touch "$TRAFFIC_DATA/follow_exit"
 
 ## 验证结果
 
-Windows 11、Python 3.13.14、HUTB 2.10.0 / Town10HD 下完成车辆生成、记录与快照导出，采集约 215.14 秒，共 8 辆车、16688 条记录。WSL2 Ubuntu 22.04 / Python 3.10 下完成 90 秒仿真位姿跟随、暂停恢复、手动结束和 API 控制释放验证；新增 6 项测试及原有测试共 31 项通过。
+Windows 11、Python 3.13.14、HUTB 2.10.0 / Town10HD 下完成车辆生成、记录与快照导出。在线复测确认 HUTB 当前构建 `ready=false`，`moveByVelocityAsync()` 和 `moveToPositionAsync()` 未产生可测水平位移；`auto` 因此选择 `pose` 后端，0.5 米空旷位姿更新在 0.2 秒内产生约 0.5 米位移。速度后端已通过本地单元测试，未将不可靠的原生速度接口作为 HUTB 在线验证结论。
 
-鼠标视角交互与退出后的控制状态已由操作者确认。修订后从道路上方 2 米的空旷起点复测 60 秒，约 2.88 秒进入跟随，水平误差中位数约 0.40 米、结束时约 2.59 米；该结果来自 HUTB 2.10.0，不代表 CarlaAir 的验证结果。
+位姿模式退出时恢复启动前的 API 控制状态，避免影响原有键盘接管设置。上述在线结果只验证短位姿更新接口，不代表完整车辆跟随或动力学速度跟随已经通过。
 
 返回[文档目录](README.md)。
 
