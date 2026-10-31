@@ -432,11 +432,11 @@ python<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;'
 <span class="s">PY</span>
 python<span class="w"> </span><span class="s2">"</span><span class="nv">$TOOLS_DIR</span><span class="s2">/follow_vehicle.py"</span><span class="w"> </span>--data<span class="w"> </span><span class="s2">"</span><span class="nv">$TRAFFIC_DATA</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--host<span class="w"> </span><span class="s2">"</span><span class="nv">$AIRSIM_IP</span><span class="s2">"</span><span class="w"> </span>--enable-follow-control<span class="w"> </span>--control-mode<span class="w"> </span>auto<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--speed<span class="w"> </span><span class="m">2</span><span class="w"> </span>--duration<span class="w"> </span><span class="m">90</span>
+<span class="w">  </span>--speed<span class="w"> </span><span class="m">12</span><span class="w"> </span>--duration<span class="w"> </span><span class="m">90</span>
 </code></pre></div>
-<p>入口要求无人机已经在空中，不会自动起飞；跟随前请先用模拟器或现有飞行入口将无人机置于安全高度。<code>auto</code> 会根据 <code>ready</code> 状态选择控制后端；可用 <code>--control-mode pose</code> 强制使用位姿模式，或用 <code>--control-mode velocity</code> 强制使用原生速度模式。速度模式以车辆速度作为前馈，并按位置误差修正速度指令。</p>
+<p>入口不会自动起飞；速度模式要求飞控报告在空中，位姿模式使用校准坐标检查无人机高于目标车辆路面至少 2 米，不依赖未就绪飞控的 <code>landed_state</code>。该高度仅作启动检查，不代表已检测无人机下方地形；跟随前请先用模拟器或现有飞行入口将无人机置于安全高度。<code>auto</code> 会根据 <code>ready</code> 状态选择控制后端；可用 <code>--control-mode pose</code> 强制使用位姿模式，或用 <code>--control-mode velocity</code> 强制使用原生速度模式。速度模式以车辆速度作为前馈，并按位置误差修正速度指令。</p>
 <p>脚本最多导出 20 个候选静态对象，至少匹配 5 个后校准 CARLA 与 AirSim 坐标，允许残差为 0.25 米，适用于坐标轴对齐、Z 方向相反的场景。默认选择附近移动车辆，可用 <code>--target-id</code> 指定。</p>
-<p><code>drone_follow.csv</code> 记录无人机、期望跟随点和实际导航点的 NED 坐标、水平误差、实际速度、阶段及速度指令；<code>follow_status.json</code> 保存实际后端和控制恢复状态。通过 <code>simGetCollisionInfo()</code> 检测到本轮新增碰撞、目标消失、地图改变或车辆数据超时会结束跟随；历史碰撞不作为本轮退出依据。<code>--speed</code>（默认 2 m/s）在原生速度模式下是 AirSim 世界坐标速度指令上限，在位姿模式下是每秒位姿更新步长上限；实际运动还受模拟器飞控状态、动力学和碰撞检查影响，不能保证达到该数值。结束时恢复启动前的 API 控制状态。</p>
+<p><code>drone_follow.csv</code> 记录无人机、期望跟随点和实际导航点的 NED 坐标、水平误差、实际速度、阶段及速度指令；<code>follow_status.json</code> 保存实际后端和控制恢复状态。通过 <code>simGetCollisionInfo()</code> 检测到本轮新增碰撞、目标消失、地图改变或车辆数据超时会结束跟随；历史碰撞不作为本轮退出依据。默认保留地形、建筑及车辆碰撞退出；位姿更新产生的新接触也可能触发退出。显式 <code>--ignore-collision</code> 同时允许位姿穿越几何体并跳过碰撞报告退出，仅供隔离仿真诊断。<code>--speed</code>（默认 12 m/s）在原生速度模式下是 AirSim 世界坐标速度指令上限，在位姿模式下是每秒位姿更新步长上限；实际运动还受模拟器飞控状态、动力学和碰撞检查影响，不能保证达到该数值。追车时上限应高于目标车速并留出爬升与追赶余量；12 m/s 也不保证实际追上车辆。结束时恢复启动前的 API 控制状态。</p>
 <p>可选的 <code>--avoid-obstacles</code> 使用 CARLA 场景射线查询检查前方通道，尝试短距离侧向或向上的中间航点；无可用路线时保持当前位置（<code>blocked</code>），查询失败时结束跟随。它依赖模拟器几何信息，不是 LiDAR／视觉感知，也不是八叉树全局规划；通道由离散射线采样，可能遗漏细小障碍，不能保证无碰撞或持续追上车辆。<code>--obstacle-margin</code> 默认 1.5 米，与 <code>--ignore-collision</code> 不可同时使用。</p>
 <p>启用前，在独立的 Windows PowerShell 终端使用匹配模拟器的 CARLA Python 启动只读查询服务：</p>
 <div class="highlight"><pre><span></span><code><span class="nv">$rayHost</span> <span class="p">=</span> <span class="nb">Read-Host</span> <span class="s1">'输入已验证可从 WSL 访问的 Windows IP'</span>
@@ -456,7 +456,8 @@ touch<span class="w"> </span><span class="s2">"</span><span class="nv">$TRAFFIC_
 <p>图中展示场景车辆与无人机，静态截图不作为动力学跟随验证依据。</p>
 <h2 id="_4">验证结果</h2>
 <p>Windows 11、Python 3.13.14、HUTB 2.10.0 / Town10HD 下完成车辆生成、记录与快照导出。在线复测确认 HUTB 当前构建 <code>ready=false</code>，<code>moveByVelocityAsync()</code> 和 <code>moveToPositionAsync()</code> 未产生可测水平位移；<code>auto</code> 因此选择 <code>pose</code> 后端，0.5 米空旷位姿更新在 0.2 秒内产生约 0.5 米位移。速度后端已通过本地单元测试，未将不可靠的原生速度接口作为 HUTB 在线验证结论。</p>
-<p>位姿模式退出时恢复启动前的 API 控制状态，避免影响原有键盘接管设置。上述在线结果只验证短位姿更新接口，不代表完整车辆跟随或动力学速度跟随已经通过。</p>
+<p>本次修订在同一 HUTB 2.10.0 / Town10HD 实例完成 20 秒 <code>auto</code> 位姿跟随复测（<code>--speed 12 --avoid-obstacles</code>，保留碰撞检查）：记录 55 行，最高观测速度约 9.51 m/s，水平误差由 51.57 米降至 44.55 米，按时退出并恢复启动前的 API 控制状态。随后 60 秒复测记录 171 行，经历 <code>climb</code>、<code>avoid</code> 和 <code>follow</code> 阶段，按时退出并恢复控制；目标车中途停车，不能据此证明持续追上移动车辆。两轮均未替换飞控状态或碰撞报告。</p>
+<p>位姿模式退出时恢复启动前的 API 控制状态，避免影响原有键盘接管设置。上述结果仅为有限场景复测，不代表完整车辆跟随或动力学速度跟随已经通过。</p>
 <p>返回<a href="../">文档目录</a>。</p>
 <h2 id="_5">说明</h2>
 <p>本文档整理、代码重构和问题排查过程中使用了大模型辅助；提交者已检查全部内容并对最终结果负责。</p></div>
