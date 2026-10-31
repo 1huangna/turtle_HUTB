@@ -41,8 +41,42 @@ class TrafficTrackingTests(unittest.TestCase):
     def test_velocity_follow_refuses_to_take_off_when_landed(self):
         self.check_follow_control_state(False, control_mode='velocity', landed_state=0)
 
-    def test_pose_follow_refuses_to_move_when_landed(self):
+    def test_pose_follow_ignores_stale_landed_state_at_safe_height(self):
         self.check_follow_control_state(False, control_mode='pose', landed_state=0)
+
+    def test_auto_pose_handles_stale_landed_state(self):
+        self.check_follow_control_state(False, control_mode='auto', ready=False, landed_state=0)
+
+    def test_pose_collision_override_does_not_exit_on_report(self):
+        self.check_follow_control_state(False, collision_on_follow=True, ignore_collision=True)
+
+    def test_pose_ground_guard_rejects_before_acquiring_control(self):
+        self.check_follow_control_state(False, landed_state=0, pose_z=50)
+
+    def test_pose_clearance_rejects_ground_and_nonfinite_coordinates(self):
+        for z in (50, 49, math.nan):
+            with self.assertRaisesRegex(RuntimeError, 'safe height'):
+                common.pose_clearance([0, 0, z], {'z': 0}, [0, 0, 50])
+        self.assertEqual(common.pose_clearance([0, 0, 10], {'z': 0}, [0, 0, 50]), 40)
+
+    def test_live_read_retries_sharing_violation(self):
+        snapshot = json.dumps({'time': time.time(), 'vehicles': []})
+        with patch.object(Path, 'read_text', side_effect=[PermissionError(), snapshot]) as read:
+            with patch.object(common.time, 'sleep'):
+                self.assertEqual(common.read_live('.')['vehicles'], [])
+            self.assertEqual(read.call_count, 2)
+
+    def test_live_read_exhaustion_and_staleness_are_not_hidden(self):
+        with patch.object(Path, 'read_text', side_effect=PermissionError()) as read:
+            with patch.object(common.time, 'sleep'):
+                with self.assertRaises(PermissionError):
+                    common.read_live('.')
+            self.assertEqual(read.call_count, 20)
+        with patch.object(Path, 'read_text', side_effect=[PermissionError(),
+                          json.dumps({'time': time.time() - 10})]):
+            with patch.object(common.time, 'sleep'):
+                with self.assertRaisesRegex(RuntimeError, 'stale'):
+                    common.read_live('.')
 
     def test_velocity_follow_stops_on_collision(self):
         self.check_follow_control_state(True, collision_on_follow=True,
@@ -62,7 +96,7 @@ class TrafficTrackingTests(unittest.TestCase):
 
     def check_follow_control_state(self, initial_api_control, collision_on_follow=False,
                                    obstacle_mode=None, control_mode='pose', landed_state=1,
-                                   ready=None):
+                                   ready=None, ignore_collision=False, pose_z=25):
         if ready is None:
             ready = control_mode == 'velocity'
         effective_mode = ('velocity' if ready else 'pose') if control_mode == 'auto' else control_mode
@@ -72,7 +106,7 @@ class TrafficTrackingTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             orientation = object()
-            pose = SimpleNamespace(position=SimpleNamespace(x_val=0, y_val=0, z_val=25),
+            pose = SimpleNamespace(position=SimpleNamespace(x_val=0, y_val=0, z_val=pose_z),
                                    orientation=orientation)
             calls = []
             collision_reads = []
@@ -116,7 +150,7 @@ class TrafficTrackingTests(unittest.TestCase):
                 def simSetVehiclePose(self, updated, ignore_collision):
                     self_test.assertEqual(effective_mode, 'pose')
                     self_test.assertIs(updated.orientation, orientation)
-                    self_test.assertFalse(ignore_collision)
+                    self_test.assertEqual(ignore_collision, args.ignore_collision)
                     if obstacle_mode == 'blocked':
                         self_test.assertEqual(updated.position, (0, 0, 25))
                     calls.append('pose')
@@ -128,6 +162,9 @@ class TrafficTrackingTests(unittest.TestCase):
                     (root / 'follow_exit').touch()
                     return SimpleNamespace(join=lambda: calls.append('velocity_join'))
 
+            rejected_landed = landed_state == 0 and effective_mode == 'velocity'
+            rejected_height = effective_mode == 'pose' and 50 - pose_z < 2
+            rejected_collision = collision_on_follow and not ignore_collision
             self_test = self
             vendor = ModuleType('openhutb_yolo_mlp_control.vendor')
             vendor.airsim = SimpleNamespace(
@@ -143,7 +180,7 @@ class TrafficTrackingTests(unittest.TestCase):
                                     vx=2, vy=0, vz=0)]})
             args = SimpleNamespace(data=root, host='fake', port=41451, target_id=None,
                                    distance=12, height=25, speed=12, duration=90,
-                                   ignore_collision=False,
+                                   ignore_collision=ignore_collision,
                                    avoid_obstacles=obstacle_mode is not None,
                                    obstacle_host=None, obstacle_port=41452, obstacle_margin=1.5,
                                    control_mode=control_mode)
@@ -155,10 +192,13 @@ class TrafficTrackingTests(unittest.TestCase):
             with patch.dict(sys.modules, {'openhutb_yolo_mlp_control.vendor': vendor}):
                 with patch.object(follow_vehicle.time, 'sleep'), patch.object(
                         follow_vehicle, 'SceneQueries', return_value=queries):
-                    if landed_state == 0:
+                    if rejected_landed:
                         with self.assertRaisesRegex(RuntimeError, 'will not take off'):
                             follow_vehicle.follow(args)
-                    elif collision_on_follow:
+                    elif rejected_height:
+                        with self.assertRaisesRegex(RuntimeError, 'safe height'):
+                            follow_vehicle.follow(args)
+                    elif rejected_collision:
                         with self.assertRaisesRegex(RuntimeError, 'Collision with test_wall'):
                             follow_vehicle.follow(args)
                     elif obstacle_mode == 'failed':
@@ -166,13 +206,13 @@ class TrafficTrackingTests(unittest.TestCase):
                             follow_vehicle.follow(args)
                     else:
                         follow_vehicle.follow(args)
-            if landed_state == 0:
+            if rejected_landed or rejected_height:
                 self.assertEqual(calls, [])
             elif effective_mode == 'velocity':
                 self.assertEqual(calls[:2], [('api', True), 'cancel'])
                 velocity_calls = [call for call in calls if isinstance(call, tuple)
                                   and call[0] == 'velocity']
-                successful_step = not collision_on_follow and obstacle_mode != 'failed'
+                successful_step = not rejected_collision and obstacle_mode != 'failed'
                 self.assertEqual(len(velocity_calls), 2 if successful_step else 1)
                 if successful_step:
                     self.assertLessEqual(math.sqrt(sum(value * value
@@ -185,14 +225,14 @@ class TrafficTrackingTests(unittest.TestCase):
                                               ('api', initial_api_control)])
             else:
                 self.assertEqual(calls, [('api', True), 'cancel']
-                                 + ([] if collision_on_follow or obstacle_mode == 'failed' else ['pose'])
+                                 + ([] if rejected_collision or obstacle_mode == 'failed' else ['pose'])
                                  + ['cancel', ('api', initial_api_control)])
             status = json.loads((root / 'follow_status.json').read_text())
             self.assertTrue(status['control_released'])
             self.assertTrue(status['api_control_restored'])
             self.assertEqual(status['final_api_control'], initial_api_control)
-            self.assertEqual(status['reason'], 'collision' if collision_on_follow else
-                             'error' if obstacle_mode == 'failed' or landed_state == 0
+            self.assertEqual(status['reason'], 'collision' if rejected_collision else
+                             'error' if obstacle_mode == 'failed' or rejected_landed or rejected_height
                              else 'manual_exit')
             if obstacle_mode == 'blocked':
                 import csv

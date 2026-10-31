@@ -27,7 +27,14 @@ def write_json(path, data):
 
 
 def read_live(directory, max_age=2.0):
-    data = json.loads((Path(directory) / 'live.json').read_text(encoding='utf-8'))
+    for attempt in range(20):
+        try:
+            data = json.loads((Path(directory) / 'live.json').read_text(encoding='utf-8'))
+            break
+        except PermissionError:
+            if attempt == 19:
+                raise
+            time.sleep(0.01)
     age = time.time() - data['time']
     if not -1.0 <= age <= max_age:
         raise RuntimeError('Vehicle telemetry is stale or clocks disagree')
@@ -111,3 +118,16 @@ def follow_step(current, target, maximum):
     dz = max(-maximum / math.sqrt(2), min(maximum / math.sqrt(2), target[2] - current[2]))
     horizontal = step_towards(current[:2], target[:2], math.sqrt(max(0, maximum ** 2 - dz ** 2)))
     return [*horizontal, current[2] + dz]
+
+
+def pose_clearance(current, vehicle, offset, minimum=2.0):
+    """Check altitude above the target road, not the unready flight controller.
+
+    This is a coarse start guard, not local terrain or obstacle sensing.
+    """
+    road_z = -vehicle['z'] + offset[2]
+    clearance = road_z - current[2]
+    if not math.isfinite(clearance) or clearance < minimum:
+        raise RuntimeError('Pose follow requires at least 2 m above the target road; '
+                           'move the drone to a safe height first')
+    return clearance

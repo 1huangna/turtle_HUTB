@@ -9,7 +9,7 @@ import time
 from pathlib import Path
 
 from common import (REFERENCE_LIMIT, calibration_offset, follow_phase, following_point,
-                    positive, read_live, follow_step, step_towards,
+                    positive, pose_clearance, read_live, follow_step, step_towards,
                     velocity_towards, write_json)
 from obstacle_avoidance import LocalAvoidance, SceneQueries
 
@@ -95,7 +95,8 @@ def follow(args):
               f'calibration residual={residual:.6f} m', flush=True)
         control_started = False
         try:
-            if flight_state.landed_state != airsim.LandedState.Flying:
+            if (control_mode == 'velocity'
+                    and flight_state.landed_state != airsim.LandedState.Flying):
                 raise RuntimeError('Follow requires the drone to be airborne; '
                                    'the follower will not take off automatically')
             if control_mode == 'velocity':
@@ -105,6 +106,10 @@ def follow(args):
                         '(flight controller ready=false); use --control-mode auto or pose')
                 if args.ignore_collision:
                     raise RuntimeError('--ignore-collision applies only to pose control')
+            if control_mode == 'pose':
+                p = client.simGetVehiclePose().position
+                target = next(v for v in vehicles if v['actor_id'] == target_id)
+                pose_clearance([p.x_val, p.y_val, p.z_val], target, offset)
             if getattr(args, 'avoid_obstacles', False):
                 queries = SceneQueries(args.obstacle_host or args.host,
                                        args.obstacle_port, offset)
@@ -123,7 +128,7 @@ def follow(args):
                 if vehicle is None:
                     raise RuntimeError('Target disappeared')
                 collision = client.simGetCollisionInfo()
-                if (collision.has_collided
+                if (not args.ignore_collision and collision.has_collided
                         and collision.time_stamp > initial_collision_timestamp):
                     reason = 'collision'
                     raise RuntimeError(f'Collision with {collision.object_name}; ending follow')
@@ -271,12 +276,12 @@ def main():
     parser.add_argument('--target-id', type=int)
     parser.add_argument('--height', type=positive, default=25)
     parser.add_argument('--distance', type=positive, default=12)
-    parser.add_argument('--speed', type=positive, default=2,
+    parser.add_argument('--speed', type=positive, default=12,
                         help='Speed limit for native control; maximum pose-step rate in fallback mode')
     parser.add_argument('--control-mode', choices=('auto', 'velocity', 'pose'), default='auto',
                         help='Auto-select native velocity or pose fallback (default)')
     parser.add_argument('--ignore-collision', action='store_true',
-                        help='Allow pose updates to pass through scene collisions')
+                        help='Allow pose updates through collisions and disable collision-report exits')
     parser.add_argument('--avoid-obstacles', action='store_true',
                         help='Check CARLA scene rays and try short local detours')
     parser.add_argument('--obstacle-host', help='Read-only CARLA ray query server; defaults to --host')
